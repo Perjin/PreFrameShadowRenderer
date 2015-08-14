@@ -1,0 +1,125 @@
+MaterialDef Simple {
+    MaterialParameters {
+        Color Color
+        Color AmbientColor
+        Matrix4 LightViewProjectionMatrix0
+        Matrix4 LightViewProjectionMatrix1
+        Matrix4 LightViewProjectionMatrix2
+        Matrix4 LightViewProjectionMatrix3
+        Texture2D ShadowMap0
+        Texture2D ShadowMap1
+        Texture2D ShadowMap2
+        Texture2D ShadowMap3
+        Vector2 FadeInfo
+        Vector4 Splits
+        Vector3 LightDir
+    }
+    Technique {
+        WorldParameters {
+            WorldViewProjectionMatrix
+            WorldMatrix
+            LightDirection
+            NormalMatrix
+        }
+        VertexShaderNodes {
+            ShaderNode TransformPosition {
+                Definition : TransformPosition : Common/MatDefs/ShaderNodes/Basic/TransformPosition.j3sn
+                InputMappings {
+                    transformsMatrix = WorldParam.WorldMatrix
+                    inputPosition = Global.position.xyz
+                }
+            }
+            ShaderNode AttributeToVarying {
+                Definition : AttributeToVarying : Common/MatDefs/ShaderNodes/Basic/AttributeToVarying.j3sn
+                InputMappings {
+                    vec3Variable = Attr.inNormal
+                }
+            }
+            ShaderNode CommonVert {
+                Definition : CommonVert : Common/MatDefs/ShaderNodes/Common/CommonVert.j3sn
+                InputMappings {
+                    worldViewProjectionMatrix = WorldParam.WorldViewProjectionMatrix
+                    modelPosition = Global.position.xyz
+                }
+                OutputMappings {
+                    Global.position = projPosition
+                }
+            }
+            ShaderNode ShadowPreFrameVertex {
+                Definition : ShadowPreFrameVertex : Common/MatDefs/ShaderNodes/Shadow/ShadowPreFrame.j3sn
+                InputMappings {
+                    m_LightViewProjectionMatrix0 = MatParam.LightViewProjectionMatrix0
+                    m_LightViewProjectionMatrix1 = MatParam.LightViewProjectionMatrix1
+                    m_LightViewProjectionMatrix2 = MatParam.LightViewProjectionMatrix2
+                    m_LightViewProjectionMatrix3 = MatParam.LightViewProjectionMatrix3
+                    worldPos = TransformPosition.outPosition
+                }
+            }
+        }
+        FragmentShaderNodes {
+            ShaderNode ShadowPreFrameFragment {
+                Definition : ShadowPreFrameFragment : Common/MatDefs/ShaderNodes/Shadow/ShadowPreFrame.j3sn
+                InputMappings {
+                    m_ShadowMap3 = MatParam.ShadowMap3
+                    m_ShadowMap2 = MatParam.ShadowMap2
+                    m_ShadowMap1 = MatParam.ShadowMap1
+                    m_ShadowMap0 = MatParam.ShadowMap0
+                    m_FadeInfo = MatParam.FadeInfo
+                    m_Splits = MatParam.Splits
+                    shadowPosition = ShadowPreFrameVertex.shadowPosition
+                    projCoord0 = ShadowPreFrameVertex.projCoord0
+                    projCoord1 = ShadowPreFrameVertex.projCoord1
+                    projCoord2 = ShadowPreFrameVertex.projCoord2
+                    projCoord3 = ShadowPreFrameVertex.projCoord3
+                }
+            }
+            ShaderNode DotProduct {
+                Definition : DotProduct : Common/MatDefs/ShaderNodes/Math/DotProduct.j3sn
+                InputMappings {
+                    vector1 = AttributeToVarying.vec3Variable
+                    vector0 = MatParam.LightDir
+                }
+            }
+
+            ShaderNode Mult {
+                Definition : Mult : Common/MatDefs/ShaderNodes/Math/Mult.j3sn
+                InputMappings {
+                    float1 = DotProduct.dotProduct
+                    float2 = ShadowPreFrameFragment.shadowIntensity
+                }
+            }
+
+            ShaderNode ConstructColor {
+                Definition : ConstructColor : Common/MatDefs/ShaderNodes/Basic/ConstructColor.j3sn
+                InputMappings {
+                    red = Mult.outFloat
+                    green = Mult.outFloat
+                    blue = Mult.outFloat
+                    alpha = Mult.outFloat
+                }
+                OutputMappings {
+                }
+            }
+            ShaderNode ColorAdd {
+                Definition : ColorAdd : Common/MatDefs/ShaderNodes/Basic/ColorAdd.j3sn
+                InputMappings {
+                    color1 = MatParam.AmbientColor
+                    color2 = ConstructColor.outColor
+                }
+                OutputMappings {
+                }
+            }
+            ShaderNode ColorMult {
+                Definition : ColorMult : Common/MatDefs/ShaderNodes/Basic/ColorMult.j3sn
+                InputMappings {
+                    color2 = ColorAdd.outColor
+                    color1 = MatParam.Color
+                }
+                OutputMappings {
+                    Global.color = outColor
+                }
+            }
+            
+        }
+    }
+}

@@ -1,0 +1,7 @@
+build/
+OpenAL32.dll
+Screenshots/
+build.xml
+lwjgl.dll
+master-application.jnlp
+nbproject/

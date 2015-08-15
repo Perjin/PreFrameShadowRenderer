@@ -8,12 +8,12 @@ ShaderNodeDefinitions{
             @input projCoord1
             @input projCoord2
             @input projCoord3
-            @input m_Splits
-            @input m_FadeInfo
-            @input m_ShadowMap0
-            @input m_ShadowMap1
-            @input m_ShadowMap2
-            @input m_ShadowMap3
+            @input Splits
+            @input FadeInfo
+            @input ShadowMap0
+            @input ShadowMap1
+            @input ShadowMap2
+            @input ShadowMap3
             @input shadowPosition
             @output shadowIntensity
         }
@@ -23,12 +23,12 @@ ShaderNodeDefinitions{
             vec4 projCoord1
             vec4 projCoord2
             vec4 projCoord3
-            vec4 m_Splits
-            vec2 m_FadeInfo
-            sampler2DShadow m_ShadowMap0
-            sampler2DShadow m_ShadowMap1
-            sampler2DShadow m_ShadowMap2
-            sampler2DShadow m_ShadowMap3
+            vec4 Splits
+            vec2 FadeInfo
+            sampler2DShadow ShadowMap0
+            sampler2DShadow ShadowMap1
+            sampler2DShadow ShadowMap2
+            sampler2DShadow ShadowMap3
 
             float shadowPosition
         }
@@ -40,10 +40,10 @@ ShaderNodeDefinitions{
         Type: Vertex
         Shader GLSL100: Common/MatDefs/ShaderNodes/Shadow/ShadowPreFrame15.vert
         Documentation{
-            @input m_LightViewProjectionMatrix0
-            @input m_LightViewProjectionMatrix1
-            @input m_LightViewProjectionMatrix2
-            @input m_LightViewProjectionMatrix3
+            @input LightViewProjectionMatrix0
+            @input LightViewProjectionMatrix1
+            @input LightViewProjectionMatrix2
+            @input LightViewProjectionMatrix3
             @input worldPos
             @output projCoord0
             @output projCoord1
@@ -52,10 +52,10 @@ ShaderNodeDefinitions{
             @output shadowPosition
         }
         Input {
-            mat4 m_LightViewProjectionMatrix0
-            mat4 m_LightViewProjectionMatrix1
-            mat4 m_LightViewProjectionMatrix2
-            mat4 m_LightViewProjectionMatrix3
+            mat4 LightViewProjectionMatrix0
+            mat4 LightViewProjectionMatrix1
+            mat4 LightViewProjectionMatrix2
+            mat4 LightViewProjectionMatrix3
             vec4 worldPos
         }
         Output {

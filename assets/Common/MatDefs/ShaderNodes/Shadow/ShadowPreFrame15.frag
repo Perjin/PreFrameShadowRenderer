@@ -32,10 +32,10 @@ void main(){
 
     shadowIntensity = 1.0;
    
-    shadowIntensity = getDirectionalLightShadows(m_Splits, shadowPosition,
-                   m_ShadowMap0,m_ShadowMap1,m_ShadowMap2,m_ShadowMap3,
+    shadowIntensity = getDirectionalLightShadows(Splits, shadowPosition,
+                   ShadowMap0,ShadowMap1,ShadowMap2,ShadowMap3,
                    projCoord0, projCoord1, projCoord2, projCoord3);
  
-    shadowIntensity = max(0.0,mix(shadowIntensity,1.0,(shadowPosition - m_FadeInfo.x) * m_FadeInfo.y));    
+    shadowIntensity = max(0.0,mix(shadowIntensity,1.0,(shadowPosition - FadeInfo.x) * FadeInfo.y));    
    
 }

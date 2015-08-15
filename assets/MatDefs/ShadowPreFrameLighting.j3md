@@ -18,8 +18,6 @@ MaterialDef Simple {
         WorldParameters {
             WorldViewProjectionMatrix
             WorldMatrix
-            LightDirection
-            NormalMatrix
         }
         VertexShaderNodes {
             ShaderNode TransformPosition {
@@ -48,10 +46,10 @@ MaterialDef Simple {
             ShaderNode ShadowPreFrameVertex {
                 Definition : ShadowPreFrameVertex : Common/MatDefs/ShaderNodes/Shadow/ShadowPreFrame.j3sn
                 InputMappings {
-                    m_LightViewProjectionMatrix0 = MatParam.LightViewProjectionMatrix0
-                    m_LightViewProjectionMatrix1 = MatParam.LightViewProjectionMatrix1
-                    m_LightViewProjectionMatrix2 = MatParam.LightViewProjectionMatrix2
-                    m_LightViewProjectionMatrix3 = MatParam.LightViewProjectionMatrix3
+                    LightViewProjectionMatrix0 = MatParam.LightViewProjectionMatrix0
+                    LightViewProjectionMatrix1 = MatParam.LightViewProjectionMatrix1
+                    LightViewProjectionMatrix2 = MatParam.LightViewProjectionMatrix2
+                    LightViewProjectionMatrix3 = MatParam.LightViewProjectionMatrix3
                     worldPos = TransformPosition.outPosition
                 }
             }
@@ -60,12 +58,12 @@ MaterialDef Simple {
             ShaderNode ShadowPreFrameFragment {
                 Definition : ShadowPreFrameFragment : Common/MatDefs/ShaderNodes/Shadow/ShadowPreFrame.j3sn
                 InputMappings {
-                    m_ShadowMap3 = MatParam.ShadowMap3
-                    m_ShadowMap2 = MatParam.ShadowMap2
-                    m_ShadowMap1 = MatParam.ShadowMap1
-                    m_ShadowMap0 = MatParam.ShadowMap0
-                    m_FadeInfo = MatParam.FadeInfo
-                    m_Splits = MatParam.Splits
+                    ShadowMap3 = MatParam.ShadowMap3
+                    ShadowMap2 = MatParam.ShadowMap2
+                    ShadowMap1 = MatParam.ShadowMap1
+                    ShadowMap0 = MatParam.ShadowMap0
+                    FadeInfo = MatParam.FadeInfo
+                    Splits = MatParam.Splits
                     shadowPosition = ShadowPreFrameVertex.shadowPosition
                     projCoord0 = ShadowPreFrameVertex.projCoord0
                     projCoord1 = ShadowPreFrameVertex.projCoord1
@@ -80,7 +78,6 @@ MaterialDef Simple {
                     vector0 = MatParam.LightDir
                 }
             }
-
             ShaderNode Mult {
                 Definition : Mult : Common/MatDefs/ShaderNodes/Math/Mult.j3sn
                 InputMappings {
@@ -88,7 +85,6 @@ MaterialDef Simple {
                     float2 = ShadowPreFrameFragment.shadowIntensity
                 }
             }
-
             ShaderNode ConstructColor {
                 Definition : ConstructColor : Common/MatDefs/ShaderNodes/Basic/ConstructColor.j3sn
                 InputMappings {
@@ -119,7 +115,6 @@ MaterialDef Simple {
                     Global.color = outColor
                 }
             }
-            
         }
     }
 }

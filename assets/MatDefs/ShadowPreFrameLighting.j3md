@@ -12,12 +12,14 @@ MaterialDef Simple {
         Texture2D ShadowMap3
         Vector2 FadeInfo
         Vector4 Splits
-        Vector3 LightDir
     }
     Technique {
+        LightMode MultiPass
         WorldParameters {
             WorldViewProjectionMatrix
             WorldMatrix
+            LightColor
+            LightPosition
         }
         VertexShaderNodes {
             ShaderNode TransformPosition {
@@ -25,12 +27,6 @@ MaterialDef Simple {
                 InputMappings {
                     transformsMatrix = WorldParam.WorldMatrix
                     inputPosition = Global.position.xyz
-                }
-            }
-            ShaderNode AttributeToVarying {
-                Definition : AttributeToVarying : Common/MatDefs/ShaderNodes/Basic/AttributeToVarying.j3sn
-                InputMappings {
-                    vec3Variable = Attr.inNormal
                 }
             }
             ShaderNode CommonVert {
@@ -51,6 +47,13 @@ MaterialDef Simple {
                     LightViewProjectionMatrix2 = MatParam.LightViewProjectionMatrix2
                     LightViewProjectionMatrix3 = MatParam.LightViewProjectionMatrix3
                     worldPos = TransformPosition.outPosition
+                }
+            }
+            ShaderNode TransformNormal {
+                Definition : TransformNormal : Common/MatDefs/ShaderNodes/Basic/TransformNormal.j3sn
+                InputMappings {
+                    transformsMatrix = WorldParam.WorldMatrix
+                    inputNormal = Attr.inNormal
                 }
             }
         }
@@ -74,8 +77,8 @@ MaterialDef Simple {
             ShaderNode DotProduct {
                 Definition : DotProduct : Common/MatDefs/ShaderNodes/Math/DotProduct.j3sn
                 InputMappings {
-                    vector1 = AttributeToVarying.vec3Variable
-                    vector0 = MatParam.LightDir
+                    vector0 = TransformNormal.outNormal
+                    vector1 = WorldParam.LightPosition
                 }
             }
             ShaderNode Mult {
@@ -96,11 +99,18 @@ MaterialDef Simple {
                 OutputMappings {
                 }
             }
+            ShaderNode ColorMult1 {
+                Definition : ColorMult : Common/MatDefs/ShaderNodes/Basic/ColorMult.j3sn
+                InputMappings {
+                    color1 = WorldParam.LightColor
+                    color2 = ConstructColor.outColor
+                }
+            }
             ShaderNode ColorAdd {
                 Definition : ColorAdd : Common/MatDefs/ShaderNodes/Basic/ColorAdd.j3sn
                 InputMappings {
                     color1 = MatParam.AmbientColor
-                    color2 = ConstructColor.outColor
+                    color2 = ColorMult1.outColor
                 }
                 OutputMappings {
                 }

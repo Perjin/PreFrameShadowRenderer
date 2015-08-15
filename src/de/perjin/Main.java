@@ -6,7 +6,9 @@ import com.jme3.app.state.ScreenshotAppState;
 import com.jme3.light.AmbientLight;
 import com.jme3.light.DirectionalLight;
 import com.jme3.material.Material;
+import com.jme3.material.RenderState;
 import com.jme3.math.ColorRGBA;
+import com.jme3.math.FastMath;
 import com.jme3.math.Vector3f;
 import com.jme3.renderer.RenderManager;
 import com.jme3.renderer.queue.RenderQueue;
@@ -19,11 +21,13 @@ import de.perjin.shadow.DirectionalLightShadowPreFrameRenderer;
 
 public class Main extends SimpleApplication {
 
+  private boolean newShadows = true;
+  private Geometry geom;
+  
   public static void main(String[] args) {
     Main app = new Main();
     app.start();
   }
-  private boolean newShadows = true;
 
   @Override
   public void simpleInitApp() {
@@ -36,6 +40,8 @@ public class Main extends SimpleApplication {
     if (newShadows) {
       DirectionalLightShadowPreFrameRenderer dsipr = new DirectionalLightShadowPreFrameRenderer(assetManager, 1024, 4);
       dsipr.setLight(directionalLight);
+      directionalLight.setColor(ColorRGBA.White);
+      rootNode.addLight(directionalLight);
       viewPort.addProcessor(dsipr);
     } else {
       DirectionalLightShadowRenderer dlsr = new DirectionalLightShadowRenderer(assetManager, 1024, 4);
@@ -60,7 +66,7 @@ public class Main extends SimpleApplication {
     if (newShadows) {
       mat = new Material(assetManager, "MatDefs/ShadowPreFrameLighting.j3md");
       mat.setColor("AmbientColor", ColorRGBA.Blue);
-      mat.setVector3("LightDir", new Vector3f(1f, -2f, 1f).normalizeLocal().negateLocal());
+     // mat.setVector3("LightDir", new Vector3f(1f, -2f, 1f).normalizeLocal().negateLocal());
       mat.setColor("Color", ColorRGBA.White);
     } else {
       mat = new Material(assetManager, "Common/MatDefs/Light/Lighting.j3md");
@@ -81,8 +87,9 @@ public class Main extends SimpleApplication {
     rootNode.attachChild(sphere);
     
     
+   
     Box q = new Box(1, 1, 1);
-    Geometry geom = new Geometry("Box", q);
+    geom = new Geometry("Box", q);
     mat = mat.clone();
     if (newShadows) {
       mat.setColor("Color", ColorRGBA.Gray);
@@ -99,7 +106,7 @@ public class Main extends SimpleApplication {
 
   @Override
   public void simpleUpdate(float tpf) {
-    //TODO: add update code
+    geom.rotate(0f, tpf*FastMath.QUARTER_PI, 0f);
   }
 
   @Override

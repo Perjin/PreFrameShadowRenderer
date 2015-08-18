@@ -293,9 +293,7 @@ public abstract class AbstractShadowPreFrameRenderer implements SceneProcessor, 
    * Returns a subclass-specific geometryList containing the occluders to be rendered in the shadow map
    *
    * @param shadowMapIndex the index of the shadow map being rendered
-   * @param sceneOccluders the occluders of the whole scene
-   * @param sceneReceivers the receivers of the whole scene
-   * @param shadowMapOcculders
+   * @param shadowMapOccluders
    * @return
    */
   protected abstract GeometryList getOccludersToRender(int shadowMapIndex, GeometryList shadowMapOccluders);

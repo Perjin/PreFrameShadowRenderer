@@ -1,0 +1,24 @@
+ShaderNodeDefinitions{ 
+    ShaderNodeDefinition VertexTransforms {      
+        Type: Vertex
+
+        Shader GLSL110: Common/MatDefs/ShaderNodes/Basic/VertexTransforms.vert
+        
+        Documentation{
+                        
+        }
+        Input {
+            vec3 normal
+            vec3 modelPosition
+            mat4 worldMatrix
+            mat4 worldViewMatrix
+            mat4 worldViewProjectionMatrix
+        }
+        Output {
+            vec3 normal
+            vec4 worldPosition
+            vec3 worldViewPosition
+            vec4 worldViewProjectionPosition
+        }
+    }
+}

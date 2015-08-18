@@ -1,0 +1,20 @@
+ShaderNodeDefinitions{ 
+    ShaderNodeDefinition SinglePassLighting {      
+        Type: Fragment
+
+        Shader GLSL110: Common/MatDefs/ShaderNodes/Lighting/SinglePassLighting.frag
+        
+        Documentation{
+                        
+        }
+        Input {
+          vec3 viewNormal
+          vec3 viewPos
+          float shadow
+          int ShadowLight
+        }
+        Output {
+          vec4 singlePassOut
+        }
+    }
+}

@@ -12,6 +12,7 @@ MaterialDef Simple {
         Texture2D ShadowMap3
         Vector2 FadeInfo
         Vector4 Splits
+        Float ShadowMapSize
     }
     Technique {
         LightMode MultiPass
@@ -39,6 +40,13 @@ MaterialDef Simple {
                     Global.position = projPosition
                 }
             }
+            ShaderNode TransformNormal {
+                Definition : TransformNormal : Common/MatDefs/ShaderNodes/Basic/TransformNormal.j3sn
+                InputMappings {
+                    transformsMatrix = WorldParam.WorldMatrix
+                    inputNormal = Attr.inNormal
+                }
+            }
             ShaderNode ShadowPreFrameVertex {
                 Definition : ShadowPreFrameVertex : Common/MatDefs/ShaderNodes/Shadow/ShadowPreFrame.j3sn
                 InputMappings {
@@ -47,13 +55,6 @@ MaterialDef Simple {
                     LightViewProjectionMatrix2 = MatParam.LightViewProjectionMatrix2
                     LightViewProjectionMatrix3 = MatParam.LightViewProjectionMatrix3
                     worldPos = TransformPosition.outPosition
-                }
-            }
-            ShaderNode TransformNormal {
-                Definition : TransformNormal : Common/MatDefs/ShaderNodes/Basic/TransformNormal.j3sn
-                InputMappings {
-                    transformsMatrix = WorldParam.WorldMatrix
-                    inputNormal = Attr.inNormal
                 }
             }
         }
@@ -67,11 +68,12 @@ MaterialDef Simple {
                     ShadowMap0 = MatParam.ShadowMap0
                     FadeInfo = MatParam.FadeInfo
                     Splits = MatParam.Splits
-                    shadowPosition = ShadowPreFrameVertex.shadowPosition
+                    shadowPosition = CommonVert.projPosition.z
                     projCoord0 = ShadowPreFrameVertex.projCoord0
                     projCoord1 = ShadowPreFrameVertex.projCoord1
                     projCoord2 = ShadowPreFrameVertex.projCoord2
                     projCoord3 = ShadowPreFrameVertex.projCoord3
+                    shadowMapSize = MatParam.ShadowMapSize
                 }
             }
             ShaderNode DotProduct {

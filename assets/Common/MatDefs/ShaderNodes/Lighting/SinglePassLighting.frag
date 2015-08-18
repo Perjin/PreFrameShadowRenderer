@@ -25,6 +25,7 @@ vec3 computeSingleLight(in vec4 lightColor, in vec4 lightData1, in vec4 lightDat
 void main(){
   singlePassOut = vec4(0.0,0.0,0.0,1.0);
   vec3 viewDir = normalize(-viewPos.xyz);
+  vec3 viewNormalNormalized = normalize(viewNormal);
 
   float shadowValue = 1.0;
   vec4 colorData;
@@ -37,6 +38,6 @@ void main(){
       shadowValue = 1.0;
     }
     #endif
-    singlePassOut.xyz += computeSingleLight(colorData, g_LightData[i+1], g_LightData[i+2], viewPos, viewDir, viewNormal)*shadowValue;
+    singlePassOut.xyz += computeSingleLight(colorData, g_LightData[i+1], g_LightData[i+2], viewPos, viewDir, viewNormalNormalized)*shadowValue;
   }
 }

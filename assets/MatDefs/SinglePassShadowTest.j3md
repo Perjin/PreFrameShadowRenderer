@@ -19,6 +19,8 @@ MaterialDef SinglePassShadowTest {
         Vector3 LightDir
         Float ShadowMapSize
         Boolean HardwareShadows
+        Int FilterMode
+        Float PCFEdge
     }
     Technique {
         LightMode SinglePass

@@ -1,23 +1,34 @@
 package de.perjin;
 
-
 import com.jme3.app.SimpleApplication;
 import com.jme3.app.state.ScreenshotAppState;
+import com.jme3.input.KeyInput;
+import com.jme3.input.controls.ActionListener;
+import com.jme3.input.controls.KeyTrigger;
 import com.jme3.light.DirectionalLight;
+import com.jme3.light.Light;
 import com.jme3.light.PointLight;
 import com.jme3.light.SpotLight;
 import com.jme3.material.Material;
 import com.jme3.material.TechniqueDef;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.FastMath;
+import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
+import com.jme3.post.SceneProcessor;
 import com.jme3.renderer.RenderManager;
 import com.jme3.renderer.queue.RenderQueue;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
+import com.jme3.scene.debug.Arrow;
 import com.jme3.scene.shape.Box;
+import com.jme3.scene.shape.Cylinder;
 import com.jme3.scene.shape.Sphere;
 import com.jme3.shadow.CompareMode;
+import com.jme3.shadow.DirectionalLightShadowRenderer;
+import com.jme3.shadow.EdgeFilteringMode;
+import com.jme3.shadow.PointLightShadowRenderer;
+import com.jme3.shadow.SpotLightShadowRenderer;
 import de.perjin.shadow.DirectionalLightShadowPreFrameRenderer;
 import de.perjin.shadow.DirectionalShadowLight;
 import de.perjin.shadow.PointLightShadowPreFrameRenderer;
@@ -25,14 +36,26 @@ import de.perjin.shadow.PointShadowLight;
 import de.perjin.shadow.ShadowMaterial;
 import de.perjin.shadow.SpotLightShadowPreFrameRenderer;
 import de.perjin.shadow.SpotShadowLight;
-import java.util.ArrayList;
 
+/**
+ * 
+ * @author Jan
+ */
 public class Main extends SimpleApplication {
 
   private Geometry geom;
-  
-  private final ArrayList<PointLight> pointLights = new ArrayList<>();
-  
+
+  private Light shadowLight = null;
+  private SceneProcessor shadowProcessor = null;
+  private int activeShadowLight = 0;
+  private int newShadowLight = 3;
+  private boolean oldShadows = false;
+  private boolean activeOldShadows = false;
+  private boolean stopMovement = false;
+  private final Vector3f lightDirection = new Vector3f(2f, -1f, 0f).normalizeLocal();
+  private final Vector3f lightPosition = new Vector3f(2f, 1f, 0f);
+  private Node lightSource;
+
   public static void main(String[] args) {
     Main app = new Main();
     app.start();
@@ -41,64 +64,48 @@ public class Main extends SimpleApplication {
   @Override
   public void simpleInitApp() {
     renderManager.setPreferredLightMode(TechniqueDef.LightMode.SinglePass);
-        renderManager.setSinglePassLightBatchSize(6);
-    ScreenshotAppState screenshotAppState = new ScreenshotAppState("Screenshots/","ShadowPreFrame",0);
+    renderManager.setSinglePassLightBatchSize(6);
+    ScreenshotAppState screenshotAppState = new ScreenshotAppState("Screenshots/", "ShadowPreFrame", 0);
     stateManager.attach(screenshotAppState);
     flyCam.setMoveSpeed(10f);
     cam.setLocation(new Vector3f(5f, 3f, -4f));
-//    DirectionalShadowLight directionalLight = new DirectionalShadowLight();
-//    directionalLight.setDirection(new Vector3f(1f, -2f, 1f).normalizeLocal());
-//    directionalLight.setColor(ColorRGBA.Red.mult(.75f));
-//    DirectionalLightShadowPreFrameRenderer dsipr = new DirectionalLightShadowPreFrameRenderer(assetManager, 1024, 4);
-//    dsipr.setShadowCompareMode(CompareMode.Hardware);
-//    dsipr.setLight(directionalLight);
-//    dsipr.setShadowZFadeLength(2f);
-//    dsipr.setShadowZExtend(20f);
-////      directionalLight.setColor(ColorRGBA.White.mult(.5f));
-//    viewPort.addProcessor(dsipr);
-//      PointLightShadowPreFrameRenderer plspfr = new PointLightShadowPreFrameRenderer(assetManager, 1024);
-//      plspfr.setShadowCompareMode(CompareMode.Hardware);
-    pointLights.add(addPointLight(new Vector3f(-3f, 1f, -1f),ColorRGBA.Green.mult(.5f),4f));
-    pointLights.add(addPointLight(new Vector3f(3f, 1f, -7f),ColorRGBA.Red.mult(.5f),3f));
-    pointLights.add(addPointLight(new Vector3f(-3f, 1f, -7f),ColorRGBA.Yellow.mult(.5f),6f));
-    pointLights.add(addPointLight(new Vector3f(0.5f, 3.5f, -3f),ColorRGBA.Blue.mult(1.5f),8f));
-    pointLights.add(addPointLight(new Vector3f(3f, 0.5f, -1f),ColorRGBA.Magenta.mult(.5f),3f));
-//    plspfr.setLight(addPointShadowLight(new Vector3f(0.5f, 3.5f, -3f),ColorRGBA.Blue.mult(1.5f),8f));
-//    viewPort.addProcessor(plspfr);
-    
-    SpotLightShadowPreFrameRenderer slspfr = new SpotLightShadowPreFrameRenderer(assetManager, 1024);
-    SpotLight spot = new SpotShadowLight();
-    spot.setDirection(new Vector3f(1f, -.01f, 0f).normalizeLocal());
-    spot.setPosition(new Vector3f(-3f, .5f, 0.75f));
-    spot.setColor(ColorRGBA.White.mult(1f));
-    spot.setSpotOuterAngle(.6f);
-    slspfr.setLight(spot);
-    slspfr.setShadowCompareMode(CompareMode.Hardware);
-    viewPort.addProcessor(slspfr);
-    rootNode.addLight(spot);
-    DirectionalLight directionalLight2 = new DirectionalLight();
-    directionalLight2.setDirection(new Vector3f(-4f, -5f, 1f).normalizeLocal());
-    directionalLight2.setColor(ColorRGBA.White.mult(.0125f));
-//    rootNode.addLight(directionalLight);
-    rootNode.addLight(directionalLight2);
-    initScene(rootNode);
     cam.lookAt(Vector3f.ZERO, Vector3f.UNIT_Y);
-    this.setDisplayStatView(true);
-    this.setDisplayFps(true);
+    initScene(rootNode);
+
+    inputManager.addListener(switchShadows, "SwitchShadows");
+    inputManager.addListener(switchOldNew, "SwitchToOldRenderer");
+    inputManager.addListener(startStop, "StopLightMovement");
+    inputManager.addMapping("SwitchShadows", new KeyTrigger(KeyInput.KEY_SPACE));
+    inputManager.addMapping("SwitchToOldRenderer", new KeyTrigger(KeyInput.KEY_1));
+    inputManager.addMapping("StopLightMovement", new KeyTrigger(KeyInput.KEY_2));
   }
 
-  private  Material mat;
   private void initScene(Node rootNode) {
+    addPointLight(new Vector3f(-2.5f, 0.5f, -2.5f), ColorRGBA.Green.mult(.35f), 6f);
+    addPointLight(new Vector3f(2.5f, 1.0f, -2.5f), ColorRGBA.Red.mult(.35f), 5f);
+    addPointLight(new Vector3f(-2.5f, 1f, 2.5f), ColorRGBA.Yellow.mult(.35f), 7f);
+    addPointLight(new Vector3f(2.5f, 1.5f, 2.5f), ColorRGBA.Magenta.mult(.35f), 4f);
+
+    DirectionalLight directionalLight = new DirectionalLight();
+    directionalLight.setDirection(new Vector3f(-4f, -5f, 1f).normalizeLocal());
+    directionalLight.setColor(ColorRGBA.White.mult(.0125f));
+    rootNode.addLight(directionalLight);
+    
+    lightSource = new Node("LightSource");
+    lightSource.attachChild(new Geometry("LightMesh", new Sphere(8, 8, .1f)));
+    lightSource.attachChild(new Geometry("LightDirection", new Arrow(new Vector3f(0f, 0f, .5f))));
+    lightSource.setMaterial(assetManager.loadMaterial("Common/Materials/WhiteColor.j3m"));
+    lightSource.setShadowMode(RenderQueue.ShadowMode.Off);
+    rootNode.attachChild(lightSource);
+    
+    Material mat;
     Box b = new Box(5f, .25f, 5f);
     Geometry plane = new Geometry("Plane", b);
     plane.setLocalTranslation(0f, -1.25f, 0f);
     mat = new ShadowMaterial(assetManager, "MatDefs/SinglePassShadowTest.j3md");
-    mat.setFloat("ShadowMapSize", 1024f);
-//    mat.setBoolean("UseShadow", true);
     plane.setMaterial(mat);
     plane.setShadowMode(RenderQueue.ShadowMode.Receive);
     rootNode.attachChild(plane);
-
 
     Sphere s = new Sphere(32, 32, .5f);
     Geometry sphere = new Geometry("Sphere", s);
@@ -106,67 +113,270 @@ public class Main extends SimpleApplication {
     sphere.setMaterial(mat);
     sphere.setShadowMode(RenderQueue.ShadowMode.CastAndReceive);
     rootNode.attachChild(sphere);
-    
-    
-   
+
     Box q = new Box(1, 1, 1);
     geom = new Geometry("Box", q);
-//    mat = mat.clone();
-//    if (newShadows) {
-//      mat.setColor("Color", ColorRGBA.Gray);
-//    } else {
-//      mat.setColor("Diffuse", ColorRGBA.Gray);
-//    }
-    
-    
-    
+
     geom.setMaterial(mat);
     geom.setShadowMode(RenderQueue.ShadowMode.CastAndReceive);
     rootNode.attachChild(geom);
+    
+    Cylinder cylinder = new Cylinder(4, 16, .25f, 4f, true);
+    Geometry cylinderGeom = new Geometry("Cylinder", cylinder);
+    cylinderGeom.setLocalTranslation(3f, 1f, 3f);
+    cylinderGeom.rotate(FastMath.HALF_PI, 0f, 0f);
+    cylinderGeom.setMaterial(mat);
+    cylinderGeom.setShadowMode(RenderQueue.ShadowMode.CastAndReceive);
+    rootNode.attachChild(cylinderGeom);
+    Geometry clone = cylinderGeom.clone();
+    Geometry clone1 = cylinderGeom.clone();
+    Geometry clone2 = cylinderGeom.clone();
+    clone.setLocalTranslation(-3f, 1f, 3f);
+    clone1.setLocalTranslation(3f, 1f, -3f);
+    clone2.setLocalTranslation(-3f, 1f, -3f);
+    rootNode.attachChild(clone);
+    rootNode.attachChild(clone1);
+    rootNode.attachChild(clone2);
   }
 
-  float delta = 0f;
-  boolean once = true;
+  float deltaRotation = 0f;
+  float deltaPosition = 0f;
+
   @Override
   public void simpleUpdate(float tpf) {
-    geom.rotate(0f, tpf*FastMath.QUARTER_PI, 0f);
-    delta += tpf;
-    float sin = FastMath.sin(delta) * tpf * 4f;
-    for (PointLight pl : pointLights){
-      Vector3f position = pl.getPosition();
-      position.addLocal(0f, 0f, sin);
-    }
-    if (once){
-      if (delta > 1f){
-        mat.getActiveTechnique().getShader().getSources().stream().forEach((source) -> {
-          System.out.println(source.getDefines());
-          System.out.println("============");
-        });
-      once = false;
+    if (!stopMovement) {
+      geom.rotate(0f, tpf * FastMath.QUARTER_PI, 0f);
+      deltaRotation += tpf;
+      float sin = FastMath.sin(deltaPosition) * 4f - 2f;
+      float cos = FastMath.cos(deltaPosition) * 4f - 1.5f;
+      Quaternion rotation = new Quaternion(new float[]{0f, -tpf * 0.5f, 0f});
+      rotation.multLocal(lightDirection);
+      lightPosition.setX(sin);
+      lightPosition.setZ(cos);
+      rotation.lookAt(lightDirection, Vector3f.UNIT_Y);
+      lightSource.setLocalRotation(rotation);
+      if (shadowLight instanceof DirectionalLight) {
+        ((DirectionalLight) shadowLight).setDirection(lightDirection);
+      }
+
+      if (shadowLight instanceof PointLight) {
+        deltaPosition += tpf;
+        lightSource.setLocalTranslation(lightPosition);
+        ((PointLight) shadowLight).setPosition(lightPosition);
+      }
+
+      if (shadowLight instanceof SpotLight) {
+        deltaPosition += tpf;
+        lightSource.setLocalTranslation(lightPosition);
+        ((SpotLight) shadowLight).setPosition(lightPosition);
+        ((SpotLight) shadowLight).setDirection(lightDirection);
       }
     }
+    if (activeOldShadows != oldShadows) {
+      activeOldShadows = oldShadows;
+      activeShadowLight = -1;
+    }
+    if (!oldShadows) {
+      if (activeShadowLight != newShadowLight) {
+        activeShadowLight = newShadowLight;
+        switch (activeShadowLight) {
+          case (0):
+            activateDirectionalShadow();
+            break;
+          case (1):
+            activatePointShadow();
+            break;
+          case (2):
+            activateSpotShadow();
+            break;
+          case (3):
+            deactivateShadow();
+            break;
+          default:
+            break;
+        }
+      }
+    } else {
+      if (activeShadowLight != newShadowLight) {
+        activeShadowLight = newShadowLight;
+        switch (activeShadowLight) {
+          case (0):
+            activateDirectionalShadowOld();
+            break;
+          case (1):
+            activatePointShadowOld();
+            break;
+          case (2):
+            activateSpotShadowOld();
+            break;
+          case (3):
+            deactivateShadow();
+            break;
+          default:
+            break;
+        }
+      }
+    }
+
   }
 
   @Override
   public void simpleRender(RenderManager rm) {
-    //TODO: add render code
   }
+
+  private PointLight addPointLight(Vector3f location, ColorRGBA color, float radius) {
+    PointLight pl = new PointLight();
+    pl.setPosition(location);
+    pl.setColor(color);
+    pl.setRadius(radius);
+    rootNode.addLight(pl);
+    return pl;
+  }
+
+  private PointShadowLight addPointShadowLight(Vector3f location, ColorRGBA color, float radius) {
+    PointShadowLight pl = new PointShadowLight();
+    pl.setPosition(location);
+    pl.setColor(color);
+    pl.setRadius(radius);
+    rootNode.addLight(pl);
+    return pl;
+  }
+
+  private void activateDirectionalShadow() {
+    rootNode.removeLight(shadowLight);
+    if (shadowProcessor != null) {
+      viewPort.removeProcessor(shadowProcessor);
+    }
+    DirectionalShadowLight directionalLight = new DirectionalShadowLight();
+    shadowLight = directionalLight;
+    directionalLight.setDirection(lightDirection);
+    directionalLight.setColor(ColorRGBA.Red.mult(.375f));
+    DirectionalLightShadowPreFrameRenderer dsipr = new DirectionalLightShadowPreFrameRenderer(assetManager, 2048, 4);
+    shadowProcessor = dsipr;
+    dsipr.setShadowCompareMode(CompareMode.Hardware);
+    dsipr.setEdgeFilteringMode(EdgeFilteringMode.Bilinear);
+    dsipr.setEdgesThickness(5);
+    dsipr.setLight(directionalLight);
+    rootNode.addLight(directionalLight);
+    viewPort.addProcessor(dsipr);
+  }
+
+  private void activateDirectionalShadowOld() {
+    rootNode.removeLight(shadowLight);
+    if (shadowProcessor != null) {
+      viewPort.removeProcessor(shadowProcessor);
+    }
+    DirectionalLight directionalLight = new DirectionalLight();
+    shadowLight = directionalLight;
+    directionalLight.setDirection(lightDirection);
+    directionalLight.setColor(ColorRGBA.Red.mult(.375f));
+    DirectionalLightShadowRenderer dsipr = new DirectionalLightShadowRenderer(assetManager, 2048, 4);
+    shadowProcessor = dsipr;
+    dsipr.setShadowCompareMode(CompareMode.Hardware);
+    dsipr.setEdgeFilteringMode(EdgeFilteringMode.Bilinear);
+    dsipr.setEdgesThickness(5);
+    dsipr.setLight(directionalLight);
+    rootNode.addLight(directionalLight);
+    viewPort.addProcessor(dsipr);
+  }
+
+  private void activatePointShadow() {
+    rootNode.removeLight(shadowLight);
+    if (shadowProcessor != null) {
+      viewPort.removeProcessor(shadowProcessor);
+    }
+    PointLightShadowPreFrameRenderer plspfr = new PointLightShadowPreFrameRenderer(assetManager, 512);
+    shadowProcessor = plspfr;
+    plspfr.setShadowCompareMode(CompareMode.Hardware);
+    PointShadowLight addPointShadowLight = addPointShadowLight(lightPosition, ColorRGBA.Blue.mult(2.5f), 12f);
+    shadowLight = addPointShadowLight;
+    plspfr.setLight(addPointShadowLight);
+    viewPort.addProcessor(plspfr);
+  }
+
+  private void activatePointShadowOld() {
+    rootNode.removeLight(shadowLight);
+    if (shadowProcessor != null) {
+      viewPort.removeProcessor(shadowProcessor);
+    }
+    PointLightShadowRenderer plspfr = new PointLightShadowRenderer(assetManager, 512);
+    shadowProcessor = plspfr;
+    plspfr.setShadowCompareMode(CompareMode.Hardware);
+    PointLight addPointShadowLight = addPointLight(lightPosition, ColorRGBA.Blue.mult(2.5f), 12f);
+    shadowLight = addPointShadowLight;
+    plspfr.setLight(addPointShadowLight);
+    viewPort.addProcessor(plspfr);
+  }
+
+  private void activateSpotShadow() {
+    rootNode.removeLight(shadowLight);
+    if (shadowProcessor != null) {
+      viewPort.removeProcessor(shadowProcessor);
+    }
+    SpotLightShadowPreFrameRenderer slspfr = new SpotLightShadowPreFrameRenderer(assetManager, 512);
+    shadowProcessor = slspfr;
+    SpotLight spot = new SpotShadowLight();
+    shadowLight = spot;
+    spot.setDirection(lightDirection);
+    spot.setPosition(lightPosition);
+    spot.setColor(ColorRGBA.White.mult(1f));
+    spot.setSpotOuterAngle(.6f);
+    slspfr.setLight(spot);
+    slspfr.setShadowCompareMode(CompareMode.Hardware);
+    viewPort.addProcessor(slspfr);
+    rootNode.addLight(spot);
+  }
+
+  private void activateSpotShadowOld() {
+    rootNode.removeLight(shadowLight);
+    if (shadowProcessor != null) {
+      viewPort.removeProcessor(shadowProcessor);
+    }
+    SpotLightShadowRenderer slspfr = new SpotLightShadowRenderer(assetManager, 512);
+    shadowProcessor = slspfr;
+    SpotLight spot = new SpotLight();
+    shadowLight = spot;
+    spot.setDirection(lightDirection);
+    spot.setPosition(lightPosition);
+    spot.setColor(ColorRGBA.White.mult(1f));
+    spot.setSpotOuterAngle(.6f);
+    slspfr.setLight(spot);
+    slspfr.setShadowCompareMode(CompareMode.Hardware);
+    viewPort.addProcessor(slspfr);
+    rootNode.addLight(spot);
+  }
+
+  private void deactivateShadow() {
+    rootNode.removeLight(shadowLight);
+    if (shadowProcessor != null) {
+      viewPort.removeProcessor(shadowProcessor);
+    }
+  }
+
+  private ActionListener switchShadows = new ActionListener() {
+    @Override
+    public void onAction(String name, boolean isPressed, float tpf) {
+      if (!isPressed) {
+        newShadowLight = (newShadowLight + 1) % 3;
+      }
+    }
+  };
+
+  private ActionListener switchOldNew = new ActionListener() {
+    @Override
+    public void onAction(String name, boolean isPressed, float tpf) {
+      if (!isPressed) {
+        oldShadows = !oldShadows;
+      }
+    }
+  };
   
-  private PointLight addPointLight(Vector3f location, ColorRGBA color, float radius){
-      PointLight pl = new PointLight();
-      pl.setPosition(location);
-      pl.setColor(color);
-      pl.setRadius(radius);
-      rootNode.addLight(pl);
-      return pl;
-  }
-  private PointShadowLight addPointShadowLight(Vector3f location, ColorRGBA color, float radius){
-      PointShadowLight pl = new PointShadowLight();
-      pl.setPosition(location);
-      pl.setColor(color);
-      pl.setRadius(radius);
-      rootNode.addLight(pl);
-      return pl;
-  }
-  
+  private ActionListener startStop = new ActionListener() {
+    @Override
+    public void onAction(String name, boolean isPressed, float tpf) {
+      if (!isPressed) {
+        stopMovement = !stopMovement;
+      }
+    }
+  };
 }

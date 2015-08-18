@@ -161,7 +161,7 @@ public abstract class AbstractShadowPreFrameRenderer implements SceneProcessor, 
     this.edgeFilteringMode = filterMode;
     if (shadowCompareMode == CompareMode.Hardware) {
       for (Texture2D shadowMap : shadowMaps) {
-        if (filterMode == EdgeFilteringMode.Bilinear) {
+        if (filterMode == EdgeFilteringMode.Bilinear || filterMode == EdgeFilteringMode.PCFPOISSON) {
           shadowMap.setMagFilter(Texture.MagFilter.Bilinear);
           shadowMap.setMinFilter(Texture.MinFilter.BilinearNoMipMaps);
         } else {
@@ -422,21 +422,20 @@ public abstract class AbstractShadowPreFrameRenderer implements SceneProcessor, 
     //iterating through the mat cache and setting the parameters
     for (Material mat : matCache) {
 
-//      mat.setFloat("ShadowMapSize", shadowMapSize);
+      mat.setFloat("ShadowMapSize", shadowMapSize);
       for (int j = 0; j < nbShadowMaps; j++) {
         mat.setMatrix4(lightViewStringCache[j], lightViewProjectionsMatrices[j]);
       }
       for (int j = 0; j < nbShadowMaps; j++) {
         mat.setTexture(shadowMapStringCache[j], shadowMaps[j]);
       }
-//      mat.setBoolean("HardwareShadows", shadowCompareMode == CompareMode.Hardware);
-//      mat.setInt("FilterMode", edgeFilteringMode.getMaterialParamValue());
-//      mat.setFloat("PCFEdge", edgesThickness);
+      mat.setBoolean("HardwareShadows", shadowCompareMode == CompareMode.Hardware);
+      mat.setInt("FilterMode", edgeFilteringMode.getMaterialParamValue());
+      mat.setFloat("PCFEdge", edgesThickness);
 //      mat.setFloat("ShadowIntensity", shadowIntensity);
       if (fadeInfo != null) {
         mat.setVector2("FadeInfo", fadeInfo);
       }
-      mat.setBoolean("HardwareShadows", true);
       setMaterialParameters(mat);
     }
   }
@@ -543,17 +542,16 @@ public abstract class AbstractShadowPreFrameRenderer implements SceneProcessor, 
       setMatParams(lightReceivers);
 
 
-      //resetting renderManager settings
-      renderManager.setForcedTechnique(null);
-      renderManager.setForcedMaterial(null);
-      renderManager.setCamera(cam, false);
-
-      //clearing the params in case there are some other shadow renderers
-     // clearMatParams();
     }
+    //resetting renderManager settings
+    renderManager.setForcedTechnique(null);
+    renderManager.setForcedMaterial(null);
+    renderManager.setCamera(cam, false);
   }
 
   public void cleanup() {
+      //clearing the params in case there are some other shadow renderers
+    clearMatParams();
   }
 
   public void reshape(ViewPort vp, int w, int h) {

@@ -436,6 +436,7 @@ public abstract class AbstractShadowPreFrameRenderer implements SceneProcessor, 
       if (fadeInfo != null) {
         mat.setVector2("FadeInfo", fadeInfo);
       }
+      mat.setBoolean("HardwareShadows", true);
       setMaterialParameters(mat);
     }
   }

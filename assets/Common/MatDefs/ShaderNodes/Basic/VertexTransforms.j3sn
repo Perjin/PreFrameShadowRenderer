@@ -19,6 +19,7 @@ ShaderNodeDefinitions{
             vec4 worldPosition
             vec3 worldViewPosition
             vec4 worldViewProjectionPosition
+            float shadowPosition
         }
     }
 }

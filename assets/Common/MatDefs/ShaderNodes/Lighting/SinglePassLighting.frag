@@ -26,15 +26,17 @@ void main(){
   singlePassOut = vec4(0.0,0.0,0.0,1.0);
   vec3 viewDir = normalize(-viewPos.xyz);
 
-  float shadowValue;
+  float shadowValue = 1.0;
   vec4 colorData;
   for( int i = 0;i < NB_LIGHTS; i+=3){
     colorData = g_LightData[i];
+    #ifdef LIGHTVIEWPROJECTIONMATRIX0
     if (i == ShadowLight){
       shadowValue = shadow;
     } else {
       shadowValue = 1.0;
     }
+    #endif
     singlePassOut.xyz += computeSingleLight(colorData, g_LightData[i+1], g_LightData[i+2], viewPos, viewDir, viewNormal)*shadowValue;
   }
 }

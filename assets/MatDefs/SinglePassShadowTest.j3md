@@ -8,7 +8,6 @@ MaterialDef SinglePassShadowTest {
         Matrix4 LightViewProjectionMatrix5
         Vector4 Splits
         Vector2 FadeInfo
-        Float ShadowMapSize
         Texture2D ShadowMap0
         Texture2D ShadowMap1
         Texture2D ShadowMap2
@@ -17,6 +16,9 @@ MaterialDef SinglePassShadowTest {
         Texture2D ShadowMap5
         Vector3 LightPos
         Int ShadowLight
+        Vector3 LightDir
+        Float ShadowMapSize
+        Boolean HardwareShadows
     }
     Technique {
         LightMode SinglePass
@@ -26,14 +28,20 @@ MaterialDef SinglePassShadowTest {
             WorldMatrix
         }
         Defines {
-          POINTLIGHT : LightPos
+            HARDWARE_SHADOWS : HardwareShadows
+            FILTER_MODE : FilterMode
+            PCFEDGE : PCFEdge
+            SHADOWMAP_SIZE : ShadowMapSize
+            FADE : FadeInfo
+            PSSM : Splits
+            POINTLIGHT : LightViewProjectionMatrix5
         }
         VertexShaderNodes {
             ShaderNode VertexTransforms {
                 Definition : VertexTransforms : Common/MatDefs/ShaderNodes/Basic/VertexTransforms.j3sn
                 InputMappings {
                     normal = Attr.inNormal
-                    worldMatrix = WorldParam.WorldMatrix
+                    worldMatrix = WorldParam.WorldMatrix : LightViewProjectionMatrix0
                     worldViewMatrix = WorldParam.WorldViewMatrix
                     worldViewProjectionMatrix = WorldParam.WorldViewProjectionMatrix
                     modelPosition = Global.position.xyz
@@ -44,6 +52,7 @@ MaterialDef SinglePassShadowTest {
             }
             ShaderNode ShadowPreFrameVertex {
                 Definition : ShadowPreFrameVertex : Common/MatDefs/ShaderNodes/Shadow/ShadowPreFrame.j3sn
+                Condition : LightViewProjectionMatrix0
                 InputMappings {
                     LightViewProjectionMatrix0 = MatParam.LightViewProjectionMatrix0
                     LightViewProjectionMatrix1 = MatParam.LightViewProjectionMatrix1
@@ -52,12 +61,15 @@ MaterialDef SinglePassShadowTest {
                     LightViewProjectionMatrix4 = MatParam.LightViewProjectionMatrix4
                     LightViewProjectionMatrix5 = MatParam.LightViewProjectionMatrix5
                     worldPos = VertexTransforms.worldPosition
+                    LightPos = MatParam.LightPos
+                    LightDir = MatParam.LightDir
                 }
             }
         }
         FragmentShaderNodes {
             ShaderNode ShadowPreFrameFragment {
                 Definition : ShadowPreFrameFragment : Common/MatDefs/ShaderNodes/Shadow/ShadowPreFrame.j3sn
+                Condition : LightViewProjectionMatrix0
                 InputMappings {
                     projCoord0 = ShadowPreFrameVertex.projCoord0
                     projCoord1 = ShadowPreFrameVertex.projCoord1
@@ -67,7 +79,6 @@ MaterialDef SinglePassShadowTest {
                     projCoord5 = ShadowPreFrameVertex.projCoord5
                     Splits = MatParam.Splits
                     FadeInfo = MatParam.FadeInfo
-                    shadowMapSize = MatParam.ShadowMapSize
                     ShadowMap0 = MatParam.ShadowMap0
                     ShadowMap1 = MatParam.ShadowMap1
                     ShadowMap2 = MatParam.ShadowMap2
@@ -76,16 +87,17 @@ MaterialDef SinglePassShadowTest {
                     ShadowMap5 = MatParam.ShadowMap5
                     LightPos = MatParam.LightPos
                     worldPos = VertexTransforms.worldPosition
-                    shadowPosition = VertexTransforms.worldViewProjectionPosition.z
+                    shadowPosition = VertexTransforms.shadowPosition
+                    inLightDot = ShadowPreFrameVertex.outLightDot
                 }
             }
             ShaderNode SinglePassLighting {
                 Definition : SinglePassLighting : Common/MatDefs/ShaderNodes/Lighting/SinglePassLighting.j3sn
                 InputMappings {
-                    shadow = ShadowPreFrameFragment.shadowIntensity
+                    shadow = ShadowPreFrameFragment.shadowIntensity : LightViewProjectionMatrix0
                     viewNormal = VertexTransforms.normal
                     viewPos = VertexTransforms.worldViewPosition
-                    ShadowLight = MatParam.ShadowLight
+                    ShadowLight = MatParam.ShadowLight : LightViewProjectionMatrix0
                 }
                 OutputMappings {
                     Global.color = singlePassOut

@@ -15,7 +15,6 @@ ShaderNodeDefinitions{
             @input ShadowMap2
             @input ShadowMap3
             @input shadowPosition
-            @input shadowMapSize
             @output shadowIntensity
         }
         Input {
@@ -28,7 +27,6 @@ ShaderNodeDefinitions{
             vec4 projCoord5
             vec4 Splits
             vec2 FadeInfo
-            float shadowMapSize
             sampler2DShadow ShadowMap0
             sampler2DShadow ShadowMap1
             sampler2DShadow ShadowMap2
@@ -39,6 +37,7 @@ ShaderNodeDefinitions{
 
             float shadowPosition
             vec3 LightPos
+            float inLightDot
         }
         Output {
             float shadowIntensity
@@ -66,6 +65,8 @@ ShaderNodeDefinitions{
             mat4 LightViewProjectionMatrix4
             mat4 LightViewProjectionMatrix5
             vec4 worldPos
+            vec3 LightPos
+            vec3 LightDir
         }
         Output {
             
@@ -75,6 +76,7 @@ ShaderNodeDefinitions{
             vec4 projCoord3
             vec4 projCoord4
             vec4 projCoord5
+            float outLightDot
         }
     }
 }

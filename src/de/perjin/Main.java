@@ -5,6 +5,7 @@ import com.jme3.app.SimpleApplication;
 import com.jme3.app.state.ScreenshotAppState;
 import com.jme3.light.DirectionalLight;
 import com.jme3.light.PointLight;
+import com.jme3.light.SpotLight;
 import com.jme3.material.Material;
 import com.jme3.material.TechniqueDef;
 import com.jme3.math.ColorRGBA;
@@ -22,6 +23,8 @@ import de.perjin.shadow.DirectionalShadowLight;
 import de.perjin.shadow.PointLightShadowPreFrameRenderer;
 import de.perjin.shadow.PointShadowLight;
 import de.perjin.shadow.ShadowMaterial;
+import de.perjin.shadow.SpotLightShadowPreFrameRenderer;
+import de.perjin.shadow.SpotShadowLight;
 import java.util.ArrayList;
 
 public class Main extends SimpleApplication {
@@ -43,25 +46,36 @@ public class Main extends SimpleApplication {
     stateManager.attach(screenshotAppState);
     flyCam.setMoveSpeed(10f);
     cam.setLocation(new Vector3f(5f, 3f, -4f));
-    DirectionalShadowLight directionalLight = new DirectionalShadowLight();
-    directionalLight.setDirection(new Vector3f(1f, -2f, 1f).normalizeLocal());
-    directionalLight.setColor(ColorRGBA.Red.mult(.75f));
-    DirectionalLightShadowPreFrameRenderer dsipr = new DirectionalLightShadowPreFrameRenderer(assetManager, 1024, 4);
-    dsipr.setShadowCompareMode(CompareMode.Hardware);
-    dsipr.setLight(directionalLight);
-    dsipr.setShadowZFadeLength(2f);
-    dsipr.setShadowZExtend(20f);
-//      directionalLight.setColor(ColorRGBA.White.mult(.5f));
+//    DirectionalShadowLight directionalLight = new DirectionalShadowLight();
+//    directionalLight.setDirection(new Vector3f(1f, -2f, 1f).normalizeLocal());
+//    directionalLight.setColor(ColorRGBA.Red.mult(.75f));
+//    DirectionalLightShadowPreFrameRenderer dsipr = new DirectionalLightShadowPreFrameRenderer(assetManager, 1024, 4);
+//    dsipr.setShadowCompareMode(CompareMode.Hardware);
+//    dsipr.setLight(directionalLight);
+//    dsipr.setShadowZFadeLength(2f);
+//    dsipr.setShadowZExtend(20f);
+////      directionalLight.setColor(ColorRGBA.White.mult(.5f));
 //    viewPort.addProcessor(dsipr);
-      PointLightShadowPreFrameRenderer plspfr = new PointLightShadowPreFrameRenderer(assetManager, 1024);
-      plspfr.setShadowCompareMode(CompareMode.Hardware);
+//      PointLightShadowPreFrameRenderer plspfr = new PointLightShadowPreFrameRenderer(assetManager, 1024);
+//      plspfr.setShadowCompareMode(CompareMode.Hardware);
     pointLights.add(addPointLight(new Vector3f(-3f, 1f, -1f),ColorRGBA.Green.mult(.5f),4f));
     pointLights.add(addPointLight(new Vector3f(3f, 1f, -7f),ColorRGBA.Red.mult(.5f),3f));
     pointLights.add(addPointLight(new Vector3f(-3f, 1f, -7f),ColorRGBA.Yellow.mult(.5f),6f));
-//    pointLights.add(addPointLight(new Vector3f(0.5f, 3.5f, -3f),ColorRGBA.Blue.mult(1.5f),8f));
+    pointLights.add(addPointLight(new Vector3f(0.5f, 3.5f, -3f),ColorRGBA.Blue.mult(1.5f),8f));
     pointLights.add(addPointLight(new Vector3f(3f, 0.5f, -1f),ColorRGBA.Magenta.mult(.5f),3f));
-    plspfr.setLight(addPointShadowLight(new Vector3f(0.5f, 3.5f, -3f),ColorRGBA.Blue.mult(1.5f),8f));
-    viewPort.addProcessor(plspfr);
+//    plspfr.setLight(addPointShadowLight(new Vector3f(0.5f, 3.5f, -3f),ColorRGBA.Blue.mult(1.5f),8f));
+//    viewPort.addProcessor(plspfr);
+    
+    SpotLightShadowPreFrameRenderer slspfr = new SpotLightShadowPreFrameRenderer(assetManager, 1024);
+    SpotLight spot = new SpotShadowLight();
+    spot.setDirection(new Vector3f(1f, -.01f, 0f).normalizeLocal());
+    spot.setPosition(new Vector3f(-3f, .5f, 0.75f));
+    spot.setColor(ColorRGBA.White.mult(1f));
+    spot.setSpotOuterAngle(.6f);
+    slspfr.setLight(spot);
+    slspfr.setShadowCompareMode(CompareMode.Hardware);
+    viewPort.addProcessor(slspfr);
+    rootNode.addLight(spot);
     DirectionalLight directionalLight2 = new DirectionalLight();
     directionalLight2.setDirection(new Vector3f(-4f, -5f, 1f).normalizeLocal());
     directionalLight2.setColor(ColorRGBA.White.mult(.0125f));
@@ -73,11 +87,11 @@ public class Main extends SimpleApplication {
     this.setDisplayFps(true);
   }
 
+  private  Material mat;
   private void initScene(Node rootNode) {
     Box b = new Box(5f, .25f, 5f);
     Geometry plane = new Geometry("Plane", b);
     plane.setLocalTranslation(0f, -1.25f, 0f);
-    Material mat;
     mat = new ShadowMaterial(assetManager, "MatDefs/SinglePassShadowTest.j3md");
     mat.setFloat("ShadowMapSize", 1024f);
 //    mat.setBoolean("UseShadow", true);
@@ -112,7 +126,7 @@ public class Main extends SimpleApplication {
   }
 
   float delta = 0f;
-  
+  boolean once = true;
   @Override
   public void simpleUpdate(float tpf) {
     geom.rotate(0f, tpf*FastMath.QUARTER_PI, 0f);
@@ -121,6 +135,15 @@ public class Main extends SimpleApplication {
     for (PointLight pl : pointLights){
       Vector3f position = pl.getPosition();
       position.addLocal(0f, 0f, sin);
+    }
+    if (once){
+      if (delta > 1f){
+        mat.getActiveTechnique().getShader().getSources().stream().forEach((source) -> {
+          System.out.println(source.getDefines());
+          System.out.println("============");
+        });
+      once = false;
+      }
     }
   }
 

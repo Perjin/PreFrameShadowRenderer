@@ -13,5 +13,11 @@ void main(){
     #ifdef POINTLIGHT
         projCoord4 = biasMat * LightViewProjectionMatrix4 * worldPos;
         projCoord5 = biasMat * LightViewProjectionMatrix5 * worldPos;
+    #else        
+        #ifndef PSSM
+            vec3 lightDir = worldPos.xyz - LightPos;
+            outLightDot = dot(LightDir,lightDir);
+        #endif
     #endif
+
 }

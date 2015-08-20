@@ -9,7 +9,6 @@ ShaderNodeDefinitions{
         }
 
         Input {
-       //   bool UseInstancing
           mat4 ViewMatrix
           mat4 ViewProjectionMatrix
           mat4 inInstanceData : INSTANCING
@@ -32,15 +31,17 @@ ShaderNodeDefinitions{
           mat4 m_BoneMatrices[NUM_BONES] : NUM_BONES
         }
         Output {
+          float shadowPosition
           vec2 texCoord
-          vec2 texCoord2 : SEPARATE_TEXCOORD
+          vec4 vWorldPos
+          vec4 vWorldViewProjectionPosition
           vec3 vNormal
           vec3 vPos
+          vec2 texCoord2 : SEPARATE_TEXCOORD
           vec3 vTangent : NORMALMAP
           vec3 vBinormal : NORMALMAP
           vec4 refVec : USE_REFLECTION
           vec4 outVertexColor : VERTEX_COLOR
-          vec4 worldViewProjectionPosition
         }
     }
 }

@@ -13,8 +13,7 @@
      * Output:
      * varying refVec
      */
-    void computeRef(in vec4 modelSpacePos){
-        vec3 worldPos = TransformWorld(modelSpacePos).xyz;
+    void computeRef(in vec4 modelSpacePos,vec3 worldPos){
 
         vec3 I = normalize( CameraPosition - worldPos  ).xyz;
         vec3 N = normalize( TransformWorld(vec4(inNormal, 0.0)).xyz );
@@ -27,6 +26,9 @@
 void main(){
    vec4 modelSpacePos = vec4(inPosition, 1.0);
    vec3 modelSpaceNorm = inNormal;
+  #if defined(LIGHTVIEWPROJECTIONMATRIX0)
+    vWorldPos = TransformWorld(modelSpacePos);
+  #endif
    
    #if  defined(NORMALMAP)
         vec3 modelSpaceTan  = inTangent.xyz;
@@ -39,8 +41,10 @@ void main(){
         Skinning_Compute(modelSpacePos, modelSpaceNorm);
         #endif
    #endif
-
-   worldViewProjectionPosition = TransformWorldViewProjection(modelSpacePos);
+   vWorldViewProjectionPosition = TransformWorldViewProjection(modelSpacePos);
+   #if defined(LIGHTVIEWPROJECTIONMATRIX0)
+    shadowPosition = vWorldViewProjectionPosition.z;
+   #endif
    texCoord = inTexCoord;
    #ifdef SEPARATE_TEXCOORD
       texCoord2 = inTexCoord2;
@@ -66,6 +70,6 @@ void main(){
     #endif
     
     #ifdef USE_REFLECTION
-      computeRef(modelSpacePos);
+      computeRef(modelSpacePos , vWorldPos);
     #endif 
 }

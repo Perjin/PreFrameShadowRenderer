@@ -1,7 +1,28 @@
 MaterialDef Simple {
     MaterialParameters {
         Boolean UseInstancing
-        Texture2D NormalMap
+        Texture2D NormalMap -LINEAR
+        Matrix4 LightViewProjectionMatrix0
+        Matrix4 LightViewProjectionMatrix1
+        Matrix4 LightViewProjectionMatrix2
+        Matrix4 LightViewProjectionMatrix3
+        Matrix4 LightViewProjectionMatrix4
+        Matrix4 LightViewProjectionMatrix5
+        Vector4 Splits
+        Vector2 FadeInfo
+        Texture2D ShadowMap0
+        Texture2D ShadowMap1
+        Texture2D ShadowMap2
+        Texture2D ShadowMap3
+        Texture2D ShadowMap4
+        Texture2D ShadowMap5
+        Vector3 LightPos
+        Int ShadowLight
+        Vector3 LightDir
+        Float ShadowMapSize
+        Boolean HardwareShadows
+        Int FilterMode
+        Float PCFEdge
     }
     Technique {
         LightMode SinglePass
@@ -14,11 +35,18 @@ MaterialDef Simple {
             ViewProjectionMatrix
         }
         Defines {
-          INSTANCING : UseInstancing
-          NORMALMAP : NormalMap
+            INSTANCING : UseInstancing
+            NORMALMAP : NormalMap
+            HARDWARE_SHADOWS : HardwareShadows
+            FILTER_MODE : FilterMode
+            PCFEDGE : PCFEdge
+            SHADOWMAP_SIZE : ShadowMapSize
+            FADE : FadeInfo
+            PSSM : Splits
+            POINTLIGHT : LightViewProjectionMatrix5
         }
         VertexShaderNodes {
-            ShaderNode VertexSkinningInstancing {
+            ShaderNode VertexSkinning {
                 Definition : VertexSkinningInstancing : Common/MatDefs/ShaderNodes/Basic/VertexSkinningInstancing.j3sn
                 InputMappings {
                     inPosition = Attr.inPosition.xyz
@@ -34,7 +62,22 @@ MaterialDef Simple {
                     inTangent = Attr.inTangent
                 }
                 OutputMappings {
-                    Global.position = worldViewProjectionPosition
+                    Global.position = vWorldViewProjectionPosition
+                }
+            }
+            ShaderNode ShadowPreFrameVertex {
+                Definition : ShadowPreFrameVertex : Common/MatDefs/ShaderNodes/Shadow/ShadowPreFrame.j3sn
+                Condition : LightViewProjectionMatrix0
+                InputMappings {
+                    LightViewProjectionMatrix4 = MatParam.LightViewProjectionMatrix4
+                    LightViewProjectionMatrix3 = MatParam.LightViewProjectionMatrix3
+                    LightViewProjectionMatrix5 = MatParam.LightViewProjectionMatrix5
+                    LightViewProjectionMatrix2 = MatParam.LightViewProjectionMatrix2
+                    LightViewProjectionMatrix1 = MatParam.LightViewProjectionMatrix1
+                    LightViewProjectionMatrix0 = MatParam.LightViewProjectionMatrix0
+                    LightPos = MatParam.LightPos
+                    LightDir = MatParam.LightDir
+                    worldPos = VertexSkinning.vWorldPos
                 }
             }
         }
@@ -42,12 +85,36 @@ MaterialDef Simple {
             ShaderNode NormalMapping {
                 Definition : NormalMapping : Common/MatDefs/ShaderNodes/Lighting/NormalMapping.j3sn
                 InputMappings {
-                    viewNormal = VertexSkinningInstancing.vNormal
-                    viewPos = VertexSkinningInstancing.vPos
-                    texCoord = VertexSkinningInstancing.texCoord
+                    viewNormal = VertexSkinning.vNormal
+                    viewPos = VertexSkinning.vPos
+                    texCoord = VertexSkinning.texCoord
                     NormalMap = MatParam.NormalMap
-                    vTangent = VertexSkinningInstancing.vTangent
-                    vBinormal = VertexSkinningInstancing.vBinormal
+                    vTangent = VertexSkinning.vTangent
+                    vBinormal = VertexSkinning.vBinormal
+                }
+            }
+            ShaderNode ShadowPreFrameFragment {
+                Definition : ShadowPreFrameFragment : Common/MatDefs/ShaderNodes/Shadow/ShadowPreFrame.j3sn
+                Condition : LightViewProjectionMatrix0
+                InputMappings {
+                    ShadowMap5 = MatParam.ShadowMap5
+                    ShadowMap4 = MatParam.ShadowMap4
+                    ShadowMap3 = MatParam.ShadowMap3
+                    ShadowMap2 = MatParam.ShadowMap2
+                    ShadowMap1 = MatParam.ShadowMap1
+                    ShadowMap0 = MatParam.ShadowMap0
+                    FadeInfo = MatParam.FadeInfo
+                    Splits = MatParam.Splits
+                    LightPos = MatParam.LightPos
+                    shadowPosition = VertexSkinning.shadowPosition
+                    worldPos = VertexSkinning.vWorldPos
+                    projCoord0 = ShadowPreFrameVertex.projCoord0
+                    projCoord1 = ShadowPreFrameVertex.projCoord1
+                    projCoord2 = ShadowPreFrameVertex.projCoord2
+                    projCoord3 = ShadowPreFrameVertex.projCoord3
+                    projCoord4 = ShadowPreFrameVertex.projCoord4
+                    projCoord5 = ShadowPreFrameVertex.projCoord5
+                    inLightDot = ShadowPreFrameVertex.outLightDot
                 }
             }
             ShaderNode SinglePassLighting {
@@ -56,7 +123,9 @@ MaterialDef Simple {
                     viewNormal = NormalMapping.outNormal
                     inTbnMat = NormalMapping.tbnMat
                     inViewDir = NormalMapping.viewDir
-                    inViewPos = VertexSkinningInstancing.vPos
+                    inViewPos = VertexSkinning.vPos
+                    shadow = ShadowPreFrameFragment.shadowIntensity : LightViewProjectionMatrix0
+                    ShadowLight = MatParam.ShadowLight : LightViewProjectionMatrix0
                 }
                 OutputMappings {
                     Global.color = singlePassOut
@@ -64,4 +133,27 @@ MaterialDef Simple {
             }
         }
     }
+    Technique PreShadow{
+        VertexShader GLSL100 :   Common/MatDefs/Shadow/PreShadow.vert
+        FragmentShader GLSL100 : Common/MatDefs/Shadow/PreShadow.frag
+
+        WorldParameters {
+            WorldViewProjectionMatrix
+            WorldViewMatrix
+            ViewMatrix
+            ViewProjectionMatrix
+        }
+        Defines {
+            INSTANCING : UseInstancing
+        }
+
+        RenderState {
+            FaceCull Off
+            DepthTest On
+            DepthWrite On
+            PolyOffset 5 3
+            ColorWrite Off
+        }
+    }
+    
 }

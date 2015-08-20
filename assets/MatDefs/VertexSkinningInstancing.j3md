@@ -1,0 +1,54 @@
+MaterialDef Simple {
+    MaterialParameters {
+        Boolean UseInstancing
+    }
+    Technique {
+        LightMode SinglePass
+        WorldParameters {
+            WorldMatrix
+            WorldViewMatrix
+            WorldViewProjectionMatrix
+            NormalMatrix
+            ViewMatrix
+            ViewProjectionMatrix
+        }
+        Defines {
+          INSTANCING UseInstancing
+          NORMALMAP NormalMap
+        }
+        VertexShaderNodes {
+            ShaderNode VertexSkinningInstancing {
+                Definition : VertexSkinningInstancing : Common/MatDefs/ShaderNodes/Basic/VertexSkinningInstancing.j3sn
+                InputMappings {
+                    inPosition = Attr.inPosition.xyz
+                    inNormal = Attr.inNormal
+                    WorldMatrix = WorldParam.WorldMatrix
+                    WorldViewMatrix = WorldParam.WorldViewMatrix
+                    ViewMatrix = WorldParam.ViewMatrix
+                    WorldViewProjectionMatrix = WorldParam.WorldViewProjectionMatrix
+                    NormalMatrix = WorldParam.NormalMatrix
+                    inTexCoord = Attr.inTexCoord
+                    UseInstancing = MatParam.UseInstancing
+                    ViewProjectionMatrix = WorldParam.ViewProjectionMatrix
+                    inInstanceData = Attr.inInstanceData
+                    inTangent = Attr.inTangent
+                }
+                OutputMappings {
+                    Global.position = worldViewProjectionPosition
+                }
+            }
+        }
+        FragmentShaderNodes {
+            ShaderNode SinglePassLighting {
+                Definition : SinglePassLighting : Common/MatDefs/ShaderNodes/Lighting/SinglePassLighting.j3sn
+                InputMappings {
+                    viewNormal = VertexSkinningInstancing.vNormal
+                    viewPos = VertexSkinningInstancing.vPos
+                }
+                OutputMappings {
+                    Global.color0 = singlePassOut
+                }
+            }
+        }
+    }
+}

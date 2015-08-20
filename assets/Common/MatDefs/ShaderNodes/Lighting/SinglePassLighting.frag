@@ -28,9 +28,9 @@ void main(){
   vec3 viewNormalNormalized = normalize(viewNormal);
 
   float shadowValue = 1.0;
-  vec4 colorData;
+  vec4 lightColorData;
   for( int i = 0;i < NB_LIGHTS; i+=3){
-    colorData = g_LightData[i];
+    lightColorData = g_LightData[i];
     #ifdef LIGHTVIEWPROJECTIONMATRIX0
     if (i == ShadowLight){
       shadowValue = shadow;
@@ -38,6 +38,6 @@ void main(){
       shadowValue = 1.0;
     }
     #endif
-    singlePassOut.xyz += computeSingleLight(colorData, g_LightData[i+1], g_LightData[i+2], viewPos, viewDir, viewNormalNormalized)*shadowValue;
+    singlePassOut.xyz += computeSingleLight(lightColorData, g_LightData[i+1], g_LightData[i+2], viewPos, viewDir, viewNormalNormalized)*shadowValue;
   }
 }

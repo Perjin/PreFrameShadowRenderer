@@ -21,14 +21,19 @@ import com.jme3.renderer.queue.RenderQueue;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
 import com.jme3.scene.debug.Arrow;
+import com.jme3.scene.instancing.InstancedGeometry;
+import com.jme3.scene.instancing.InstancedNode;
 import com.jme3.scene.shape.Box;
 import com.jme3.scene.shape.Cylinder;
 import com.jme3.scene.shape.Sphere;
+import com.jme3.shader.Shader;
+import com.jme3.shader.VarType;
 import com.jme3.shadow.CompareMode;
 import com.jme3.shadow.DirectionalLightShadowRenderer;
 import com.jme3.shadow.EdgeFilteringMode;
 import com.jme3.shadow.PointLightShadowRenderer;
 import com.jme3.shadow.SpotLightShadowRenderer;
+import com.jme3.util.TangentBinormalGenerator;
 import de.perjin.shadow.DirectionalLightShadowPreFrameRenderer;
 import de.perjin.shadow.DirectionalShadowLight;
 import de.perjin.shadow.PointLightShadowPreFrameRenderer;
@@ -36,9 +41,10 @@ import de.perjin.shadow.PointShadowLight;
 import de.perjin.shadow.ShadowMaterial;
 import de.perjin.shadow.SpotLightShadowPreFrameRenderer;
 import de.perjin.shadow.SpotShadowLight;
+import java.util.Collection;
 
 /**
- * 
+ *
  * @author Jan
  */
 public class Main extends SimpleApplication {
@@ -52,9 +58,10 @@ public class Main extends SimpleApplication {
   private boolean oldShadows = false;
   private boolean activeOldShadows = false;
   private boolean stopMovement = false;
-  private final Vector3f lightDirection = new Vector3f(2f, -1f, 0f).normalizeLocal();
-  private final Vector3f lightPosition = new Vector3f(2f, 1f, 0f);
+  private final Vector3f lightDirection = new Vector3f(4f, -1f, 0f).normalizeLocal();
+  private final Vector3f lightPosition = new Vector3f(2f, .6f, 0f);
   private Node lightSource;
+  private Material mat2;
 
   public static void main(String[] args) {
     Main app = new Main();
@@ -90,19 +97,20 @@ public class Main extends SimpleApplication {
     directionalLight.setDirection(new Vector3f(-4f, -5f, 1f).normalizeLocal());
     directionalLight.setColor(ColorRGBA.White.mult(.0125f));
     rootNode.addLight(directionalLight);
-    
+
     lightSource = new Node("LightSource");
     lightSource.attachChild(new Geometry("LightMesh", new Sphere(8, 8, .1f)));
     lightSource.attachChild(new Geometry("LightDirection", new Arrow(new Vector3f(0f, 0f, .5f))));
     lightSource.setMaterial(assetManager.loadMaterial("Common/Materials/WhiteColor.j3m"));
     lightSource.setShadowMode(RenderQueue.ShadowMode.Off);
     rootNode.attachChild(lightSource);
-    
+
     Material mat;
     Box b = new Box(5f, .25f, 5f);
     Geometry plane = new Geometry("Plane", b);
     plane.setLocalTranslation(0f, -1.25f, 0f);
     mat = new ShadowMaterial(assetManager, "MatDefs/SinglePassShadowTest.j3md");
+//    mat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
     plane.setMaterial(mat);
     plane.setShadowMode(RenderQueue.ShadowMode.Receive);
     rootNode.attachChild(plane);
@@ -114,13 +122,36 @@ public class Main extends SimpleApplication {
     sphere.setShadowMode(RenderQueue.ShadowMode.CastAndReceive);
     rootNode.attachChild(sphere);
 
+    InstancedNode instancedNode = new InstancedNode("InstancedSphere");
+    Geometry instanceSphere = (Geometry) sphere.deepClone();
+    TangentBinormalGenerator.generate(instanceSphere);
+    mat2 = new Material(assetManager, "MatDefs/VertexSkinningInstancing.j3md");
+    mat2.setBoolean("UseInstancing", true);
+    //mat2.setTexture("Diffuse", assetManager.loadTexture("Common/Textures/MissingMaterial.png"));
+    instanceSphere.setMaterial(mat2);
+    Geometry instanceSphere1 = (Geometry) instanceSphere.clone();
+    Geometry instanceSphere2 = (Geometry) instanceSphere.clone();
+    Geometry instanceSphere3 = (Geometry) instanceSphere.clone();
+    Geometry instanceSphere4 = (Geometry) instanceSphere.clone();
+    instanceSphere.setLocalTranslation(2f, 1.5f, 0f);
+    instanceSphere1.setLocalTranslation(0f, 1.5f, -2f);
+    instanceSphere2.setLocalTranslation(2f, 1.5f, 2f);
+    instanceSphere3.setLocalTranslation(0f, 1.5f, 2f);
+    instanceSphere4.setLocalTranslation(0f, 3.5f, 0f);
+    instancedNode.attachChild(instanceSphere);
+    instancedNode.attachChild(instanceSphere1);
+    instancedNode.attachChild(instanceSphere2);
+    instancedNode.attachChild(instanceSphere3);
+    instancedNode.attachChild(instanceSphere4);
+    instancedNode.instance();
+    rootNode.attachChild(instancedNode);
     Box q = new Box(1, 1, 1);
     geom = new Geometry("Box", q);
 
     geom.setMaterial(mat);
     geom.setShadowMode(RenderQueue.ShadowMode.CastAndReceive);
     rootNode.attachChild(geom);
-    
+
     Cylinder cylinder = new Cylinder(4, 16, .25f, 4f, true);
     Geometry cylinderGeom = new Geometry("Cylinder", cylinder);
     cylinderGeom.setLocalTranslation(3f, 1f, 3f);
@@ -142,8 +173,18 @@ public class Main extends SimpleApplication {
   float deltaRotation = 0f;
   float deltaPosition = 0f;
 
+//  boolean once = true;
   @Override
   public void simpleUpdate(float tpf) {
+//    if(once && deltaRotation > 1f){
+//      Collection<Shader.ShaderSource> sources = mat2.getActiveTechnique().getShader().getSources();
+//      sources.stream().forEach((shaderSource) -> {
+//        System.out.println(shaderSource.getDefines());
+//        System.out.println(shaderSource.getSource());
+//      });
+//      System.out.println();
+//      once = false;
+//    }
     if (!stopMovement) {
       geom.rotate(0f, tpf * FastMath.QUARTER_PI, 0f);
       deltaRotation += tpf;
@@ -313,7 +354,7 @@ public class Main extends SimpleApplication {
     if (shadowProcessor != null) {
       viewPort.removeProcessor(shadowProcessor);
     }
-    SpotLightShadowPreFrameRenderer slspfr = new SpotLightShadowPreFrameRenderer(assetManager, 512);
+    SpotLightShadowPreFrameRenderer slspfr = new SpotLightShadowPreFrameRenderer(assetManager, 2048);
     shadowProcessor = slspfr;
     SpotLight spot = new SpotShadowLight();
     shadowLight = spot;
@@ -370,7 +411,7 @@ public class Main extends SimpleApplication {
       }
     }
   };
-  
+
   private ActionListener startStop = new ActionListener() {
     @Override
     public void onAction(String name, boolean isPressed, float tpf) {

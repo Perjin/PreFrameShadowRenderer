@@ -9,9 +9,11 @@ ShaderNodeDefinitions{
         }
         Input {
           vec3 viewNormal
-          vec3 viewPos
+          vec3 inViewPos
+          vec3 inViewDir : NORMALMAP
           float shadow
           int ShadowLight
+          mat3 inTbnMat : NORMALMAP
         }
         Output {
           vec4 singlePassOut

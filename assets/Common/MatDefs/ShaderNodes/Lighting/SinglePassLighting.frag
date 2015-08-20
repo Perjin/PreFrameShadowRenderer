@@ -1,7 +1,9 @@
 #import "Common/ShaderLib/Lighting.glsllib"
 #import "Common/ShaderLib/BlinnPhongLighting.glsllib"
 uniform vec4 g_LightData[NB_LIGHTS];
-
+#ifdef NORMALMAP   
+  mat3 tbnMat;
+#endif
 vec3 computeSingleLight(in vec4 lightColor, in vec4 lightData1, in vec4 lightData2, in vec3 viewPos, in vec3 viewDir, in vec3 viewNormal){
             vec4 lightDir;
             vec3 lightVec;    
@@ -16,6 +18,14 @@ vec3 computeSingleLight(in vec4 lightColor, in vec4 lightData1, in vec4 lightDat
             #if __VERSION__ >= 110
             }
             #endif
+
+            #ifdef NORMALMAP         
+                //Normal map -> lighting is computed in tangent space
+                lightDir.xyz = normalize(lightDir.xyz * tbnMat);                
+            #else
+                //no Normal map -> lighting is computed in view space
+                lightDir.xyz = normalize(lightDir.xyz);                
+            #endif
             
             vec2 light = computeLighting(viewNormal, viewDir, lightDir.xyz, lightDir.w * spotFallOff , 50.0);
           
@@ -24,8 +34,14 @@ vec3 computeSingleLight(in vec4 lightColor, in vec4 lightData1, in vec4 lightDat
 
 void main(){
   singlePassOut = vec4(0.0,0.0,0.0,1.0);
-  vec3 viewDir = normalize(-viewPos.xyz);
   vec3 viewNormalNormalized = normalize(viewNormal);
+
+  #ifdef NORMALMAP   
+    vec3 viewDir = inViewDir;
+    tbnMat = inTbnMat;
+  #else
+    vec3 viewDir = normalize(-inViewPos.xyz);
+  #endif
 
   float shadowValue = 1.0;
   vec4 lightColorData;
@@ -38,6 +54,7 @@ void main(){
       shadowValue = 1.0;
     }
     #endif
-    singlePassOut.xyz += computeSingleLight(lightColorData, g_LightData[i+1], g_LightData[i+2], viewPos, viewDir, viewNormalNormalized)*shadowValue;
+
+    singlePassOut.xyz += computeSingleLight(lightColorData, g_LightData[i+1], g_LightData[i+2], inViewPos, viewDir, viewNormalNormalized)*shadowValue;
   }
 }

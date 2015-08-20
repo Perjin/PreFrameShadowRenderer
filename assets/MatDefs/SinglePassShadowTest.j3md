@@ -30,13 +30,6 @@ MaterialDef SinglePassShadowTest {
             WorldMatrix
         }
         Defines {
-            HARDWARE_SHADOWS : HardwareShadows
-            FILTER_MODE : FilterMode
-            PCFEDGE : PCFEdge
-            SHADOWMAP_SIZE : ShadowMapSize
-            FADE : FadeInfo
-            PSSM : Splits
-            POINTLIGHT : LightViewProjectionMatrix5
         }
         VertexShaderNodes {
             ShaderNode VertexTransforms {
@@ -98,7 +91,7 @@ MaterialDef SinglePassShadowTest {
                 InputMappings {
                     shadow = ShadowPreFrameFragment.shadowIntensity : LightViewProjectionMatrix0
                     viewNormal = VertexTransforms.normal
-                    viewPos = VertexTransforms.worldViewPosition
+                    inViewPos = VertexTransforms.worldViewPosition
                     ShadowLight = MatParam.ShadowLight : LightViewProjectionMatrix0
                 }
                 OutputMappings {

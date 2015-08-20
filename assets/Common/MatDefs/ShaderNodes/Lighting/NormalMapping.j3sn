@@ -1,0 +1,24 @@
+ShaderNodeDefinitions{ 
+    ShaderNodeDefinition NormalMapping {      
+        Type: Fragment
+
+        Shader GLSL110: Common/MatDefs/ShaderNodes/Lighting/NormalMapping.frag
+        
+        Documentation{
+                        
+        }
+        Input {
+          vec3 viewNormal
+          vec3 viewPos
+          vec2 texCoord
+          sampler2D NormalMap
+          vec3 vTangent
+          vec3 vBinormal
+        }
+        Output {
+          vec3 outNormal
+          mat3 tbnMat
+          vec3 viewDir
+        }
+    }
+}

@@ -7,14 +7,15 @@ ShaderNodeDefinitions{
         Documentation{
                         
         }
+
         Input {
-          bool UseInstancing
+       //   bool UseInstancing
           mat4 ViewMatrix
           mat4 ViewProjectionMatrix
-          mat4 inInstanceData : UseInstancing
-          mat4 WorldMatrix : !UseInstancing
-          mat4 WorldViewMatrix : !UseInstancing
-          mat4 WorldViewProjectionMatrix : !UseInstancing
+          mat4 inInstanceData : INSTANCING
+          mat4 WorldMatrix : !INSTANCING
+          mat4 WorldViewMatrix : !INSTANCING
+          mat4 WorldViewProjectionMatrix : !INSTANCING
           mat3 NormalMatrix
           vec3 inPosition
           vec3 inNormal

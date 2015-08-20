@@ -1,6 +1,7 @@
 MaterialDef Simple {
     MaterialParameters {
         Boolean UseInstancing
+        Texture2D NormalMap
     }
     Technique {
         LightMode SinglePass
@@ -13,8 +14,8 @@ MaterialDef Simple {
             ViewProjectionMatrix
         }
         Defines {
-          INSTANCING UseInstancing
-          NORMALMAP NormalMap
+          INSTANCING : UseInstancing
+          NORMALMAP : NormalMap
         }
         VertexShaderNodes {
             ShaderNode VertexSkinningInstancing {
@@ -28,7 +29,6 @@ MaterialDef Simple {
                     WorldViewProjectionMatrix = WorldParam.WorldViewProjectionMatrix
                     NormalMatrix = WorldParam.NormalMatrix
                     inTexCoord = Attr.inTexCoord
-                    UseInstancing = MatParam.UseInstancing
                     ViewProjectionMatrix = WorldParam.ViewProjectionMatrix
                     inInstanceData = Attr.inInstanceData
                     inTangent = Attr.inTangent
@@ -39,14 +39,27 @@ MaterialDef Simple {
             }
         }
         FragmentShaderNodes {
-            ShaderNode SinglePassLighting {
-                Definition : SinglePassLighting : Common/MatDefs/ShaderNodes/Lighting/SinglePassLighting.j3sn
+            ShaderNode NormalMapping {
+                Definition : NormalMapping : Common/MatDefs/ShaderNodes/Lighting/NormalMapping.j3sn
                 InputMappings {
                     viewNormal = VertexSkinningInstancing.vNormal
                     viewPos = VertexSkinningInstancing.vPos
+                    texCoord = VertexSkinningInstancing.texCoord
+                    NormalMap = MatParam.NormalMap
+                    vTangent = VertexSkinningInstancing.vTangent
+                    vBinormal = VertexSkinningInstancing.vBinormal
+                }
+            }
+            ShaderNode SinglePassLighting {
+                Definition : SinglePassLighting : Common/MatDefs/ShaderNodes/Lighting/SinglePassLighting.j3sn
+                InputMappings {
+                    viewNormal = NormalMapping.outNormal
+                    inTbnMat = NormalMapping.tbnMat
+                    inViewDir = NormalMapping.viewDir
+                    inViewPos = VertexSkinningInstancing.vPos
                 }
                 OutputMappings {
-                    Global.color0 = singlePassOut
+                    Global.color = singlePassOut
                 }
             }
         }

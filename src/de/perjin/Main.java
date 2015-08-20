@@ -20,20 +20,18 @@ import com.jme3.renderer.RenderManager;
 import com.jme3.renderer.queue.RenderQueue;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
+import com.jme3.scene.Spatial;
 import com.jme3.scene.debug.Arrow;
-import com.jme3.scene.instancing.InstancedGeometry;
 import com.jme3.scene.instancing.InstancedNode;
 import com.jme3.scene.shape.Box;
 import com.jme3.scene.shape.Cylinder;
 import com.jme3.scene.shape.Sphere;
 import com.jme3.shader.Shader;
-import com.jme3.shader.VarType;
 import com.jme3.shadow.CompareMode;
 import com.jme3.shadow.DirectionalLightShadowRenderer;
 import com.jme3.shadow.EdgeFilteringMode;
 import com.jme3.shadow.PointLightShadowRenderer;
 import com.jme3.shadow.SpotLightShadowRenderer;
-import com.jme3.util.TangentBinormalGenerator;
 import de.perjin.shadow.DirectionalLightShadowPreFrameRenderer;
 import de.perjin.shadow.DirectionalShadowLight;
 import de.perjin.shadow.PointLightShadowPreFrameRenderer;
@@ -62,6 +60,7 @@ public class Main extends SimpleApplication {
   private final Vector3f lightPosition = new Vector3f(2f, .6f, 0f);
   private Node lightSource;
   private Material mat2;
+    private InstancedNode instancedNode;
 
   public static void main(String[] args) {
     Main app = new Main();
@@ -122,23 +121,25 @@ public class Main extends SimpleApplication {
     sphere.setShadowMode(RenderQueue.ShadowMode.CastAndReceive);
     rootNode.attachChild(sphere);
 
-    InstancedNode instancedNode = new InstancedNode("InstancedSphere");
-    Geometry instanceSphere = (Geometry) sphere.deepClone();
-    TangentBinormalGenerator.generate(instanceSphere);
+    instancedNode = new InstancedNode("InstancedSphere");
+    Spatial loadModel = assetManager.loadModel("Models/normal_cube/normal_cube.j3o");
+//    Geometry instanceSphere = (Geometry) sphere.deepClone();
+//    TangentBinormalGenerator.generate(instanceSphere);
     mat2 = new Material(assetManager, "MatDefs/VertexSkinningInstancing.j3md");
     mat2.setBoolean("UseInstancing", true);
     //mat2.setTexture("Diffuse", assetManager.loadTexture("Common/Textures/MissingMaterial.png"));
-    instanceSphere.setMaterial(mat2);
-    Geometry instanceSphere1 = (Geometry) instanceSphere.clone();
-    Geometry instanceSphere2 = (Geometry) instanceSphere.clone();
-    Geometry instanceSphere3 = (Geometry) instanceSphere.clone();
-    Geometry instanceSphere4 = (Geometry) instanceSphere.clone();
-    instanceSphere.setLocalTranslation(2f, 1.5f, 0f);
+    mat2.setTexture("NormalMap", assetManager.loadTexture("Models/normal_cube/cube_normal.png"));
+    loadModel.setMaterial(mat2);
+    Geometry instanceSphere1 = (Geometry) loadModel.clone();
+    Geometry instanceSphere2 = (Geometry) loadModel.clone();
+    Geometry instanceSphere3 = (Geometry) loadModel.clone();
+    Geometry instanceSphere4 = (Geometry) loadModel.clone();
+    loadModel.setLocalTranslation(2f, 1.5f, 0f);
     instanceSphere1.setLocalTranslation(0f, 1.5f, -2f);
     instanceSphere2.setLocalTranslation(2f, 1.5f, 2f);
     instanceSphere3.setLocalTranslation(0f, 1.5f, 2f);
     instanceSphere4.setLocalTranslation(0f, 3.5f, 0f);
-    instancedNode.attachChild(instanceSphere);
+    instancedNode.attachChild(loadModel);
     instancedNode.attachChild(instanceSphere1);
     instancedNode.attachChild(instanceSphere2);
     instancedNode.attachChild(instanceSphere3);
@@ -173,18 +174,18 @@ public class Main extends SimpleApplication {
   float deltaRotation = 0f;
   float deltaPosition = 0f;
 
-//  boolean once = true;
+  boolean once = true;
   @Override
   public void simpleUpdate(float tpf) {
-//    if(once && deltaRotation > 1f){
-//      Collection<Shader.ShaderSource> sources = mat2.getActiveTechnique().getShader().getSources();
-//      sources.stream().forEach((shaderSource) -> {
-//        System.out.println(shaderSource.getDefines());
-//        System.out.println(shaderSource.getSource());
-//      });
-//      System.out.println();
-//      once = false;
-//    }
+    if(once && deltaRotation > 1f){
+      Collection<Shader.ShaderSource> sources = mat2.getActiveTechnique().getShader().getSources();
+      sources.stream().forEach((shaderSource) -> {
+        System.out.println(shaderSource.getDefines());
+        System.out.println(shaderSource.getSource());
+      });
+      System.out.println();
+      once = false;
+    }
     if (!stopMovement) {
       geom.rotate(0f, tpf * FastMath.QUARTER_PI, 0f);
       deltaRotation += tpf;

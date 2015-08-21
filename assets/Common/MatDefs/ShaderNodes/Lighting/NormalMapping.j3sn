@@ -10,8 +10,7 @@ ShaderNodeDefinitions{
         Input {
           vec3 viewNormal
           vec3 viewPos
-          vec2 texCoord
-          sampler2D NormalMap
+          vec3 inNormalMap
           vec3 vTangent
           vec3 vBinormal
         }

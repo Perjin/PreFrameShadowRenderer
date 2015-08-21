@@ -27,7 +27,7 @@ vec3 computeSingleLight(in vec4 lightColor, in vec4 lightData1, in vec4 lightDat
                 lightDir.xyz = normalize(lightDir.xyz);                
             #endif
             
-            vec2 light = computeLighting(viewNormal, viewDir, lightDir.xyz, lightDir.w * spotFallOff , 50.0);
+            vec2 light = computeLighting(viewNormal, viewDir, lightDir.xyz, lightDir.w * spotFallOff , 0.0);
           
             return lightColor.xyz* (light.x + light.y) ;
 }
@@ -47,14 +47,17 @@ void main(){
   vec4 lightColorData;
   for( int i = 0;i < NB_LIGHTS; i+=3){
     lightColorData = g_LightData[i];
-    #ifdef LIGHTVIEWPROJECTIONMATRIX0
+    #ifdef NUMBEROFSHADOWS
     if (i == ShadowLight){
-      shadowValue = shadow;
+      shadowValue = max(shadow,0.0);
     } else {
       shadowValue = 1.0;
     }
     #endif
 
-    singlePassOut.xyz += computeSingleLight(lightColorData, g_LightData[i+1], g_LightData[i+2], inViewPos, viewDir, viewNormalNormalized)*shadowValue;
+    singlePassOut.xyz += computeSingleLight(lightColorData, g_LightData[i+1], g_LightData[i+2], inViewPos, viewDir, viewNormalNormalized) * shadowValue;
   }
+  #ifdef DIFFUSEMAP
+    singlePassOut.xyz *= diffuse;
+  #endif
 }

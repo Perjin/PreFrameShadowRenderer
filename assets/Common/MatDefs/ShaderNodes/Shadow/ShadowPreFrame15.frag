@@ -2,17 +2,33 @@
 // gather functions are declared to work on shadowmaps
 #extension GL_ARB_gpu_shader5 : enable
 
-#ifdef HARDWARE_SHADOWS
+#if (NUMBEROFSHADOWS == 6)
+  #ifndef POINTLIGHT
+    #define POINTLIGHT
+  #endif
+#endif
+#if (NUMBEROFSHADOWS == 4)
+  #ifndef PSSM
+    #define PSSM
+  #endif
+#endif
+#if (NUMBEROFSHADOWS == 1)
+  #ifndef SPOTLIGHT
+    #define SPOTLIGHT
+  #endif
+#endif
+
+//#ifdef HARDWARE_SHADOWS
     #define SHADOWMAP sampler2DShadow
     #define SHADOWCOMPAREOFFSET(tex,coord,offset) textureProjOffset(tex, coord, offset)
     #define SHADOWCOMPARE(tex,coord) textureProj(tex, coord)
     #define SHADOWGATHER(tex,coord) textureGather(tex, coord.xy, coord.z)
-#else
-    #define SHADOWMAP sampler2D
-    #define SHADOWCOMPAREOFFSET(tex,coord,offset) step(coord.z, textureProjOffset(tex, coord, offset).r)
-    #define SHADOWCOMPARE(tex,coord) step(coord.z, textureProj(tex, coord).r) 
-    #define SHADOWGATHER(tex,coord) step(coord.z, textureGather(tex, coord.xy))
-#endif
+//#else
+//    #define SHADOWMAP sampler2D
+//    #define SHADOWCOMPAREOFFSET(tex,coord,offset) step(coord.z, textureProjOffset(tex, coord, offset).r)
+//    #define SHADOWCOMPARE(tex,coord) step(coord.z, textureProj(tex, coord).r) 
+//    #define SHADOWGATHER(tex,coord) step(coord.z, textureGather(tex, coord.xy))
+//#endif
 
 
 #if FILTER_MODE == 0
@@ -246,32 +262,28 @@ float Shadow_DoPCFPoisson(in SHADOWMAP tex, in vec4 projCoord){
 
 
 
-
-
-
-
-
-
-
+in vec4[6] outVertexProjCoord;
 
 void main(){
    // shadowIntensity = 1.0;
     #ifdef POINTLIGHT         
             shadowIntensity = getPointLightShadows(worldPos, LightPos,
                            ShadowMap0,ShadowMap1,ShadowMap2,ShadowMap3,ShadowMap4,ShadowMap5,
-                           projCoord0, projCoord1, projCoord2, projCoord3, projCoord4, projCoord5);
+                           outVertexProjCoord[0], outVertexProjCoord[1], outVertexProjCoord[2], outVertexProjCoord[3], outVertexProjCoord[4], outVertexProjCoord[5]);
     #else
        #ifdef PSSM
             shadowIntensity = getDirectionalLightShadows(Splits, shadowPosition,
                            ShadowMap0,ShadowMap1,ShadowMap2,ShadowMap3,
-                           projCoord0, projCoord1, projCoord2, projCoord3);
+                           outVertexProjCoord[0], outVertexProjCoord[1], outVertexProjCoord[2], outVertexProjCoord[3]);
        #else
+          #ifdef SPOTLIGHT
             //spotlight
             if(inLightDot < 0){
                 shadowIntensity = 1.0;
             } else {
-              shadowIntensity = getSpotLightShadows(ShadowMap0,projCoord0);
+              shadowIntensity = getSpotLightShadows(ShadowMap0,outVertexProjCoord[0]);
             }
+           #endif
        #endif
     #endif   
     #ifdef FADE

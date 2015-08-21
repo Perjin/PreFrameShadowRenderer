@@ -4,27 +4,9 @@ ShaderNodeDefinitions{
         Shader GLSL100: Common/MatDefs/ShaderNodes/Shadow/ShadowPreFrame15.frag
         Documentation{            
             This Node is responsible for computing shadows of a directional light source.                
-            @input projCoord0
-            @input projCoord1
-            @input projCoord2
-            @input projCoord3
-            @input Splits
-            @input FadeInfo
-            @input ShadowMap0
-            @input ShadowMap1
-            @input ShadowMap2
-            @input ShadowMap3
-            @input shadowPosition
-            @output shadowIntensity
         }
         Input {
             
-            vec4 projCoord0
-            vec4 projCoord1
-            vec4 projCoord2
-            vec4 projCoord3
-            vec4 projCoord4
-            vec4 projCoord5
             vec4 Splits
             vec2 FadeInfo
             sampler2DShadow ShadowMap0
@@ -38,6 +20,8 @@ ShaderNodeDefinitions{
             float shadowPosition
             vec3 LightPos
             float inLightDot
+
+            //vec4 inVertexProjCoord[6]
         }
         Output {
             float shadowIntensity
@@ -47,15 +31,9 @@ ShaderNodeDefinitions{
         Type: Vertex
         Shader GLSL100: Common/MatDefs/ShaderNodes/Shadow/ShadowPreFrame15.vert
         Documentation{
-            @input LightViewProjectionMatrix0
-            @input LightViewProjectionMatrix1
-            @input LightViewProjectionMatrix2
-            @input LightViewProjectionMatrix3
+            @input LightViewProjectionMatrix
             @input worldPos
-            @output projCoord0
-            @output projCoord1
-            @output projCoord2
-            @output projCoord3
+            @output projCoord
         }
         Input {
             mat4 LightViewProjectionMatrix0
@@ -69,13 +47,7 @@ ShaderNodeDefinitions{
             vec3 LightDir
         }
         Output {
-            
-            vec4 projCoord0
-            vec4 projCoord1
-            vec4 projCoord2
-            vec4 projCoord3
-            vec4 projCoord4
-            vec4 projCoord5
+            //vec4 outVertexProjCoord[6]
             float outLightDot
         }
     }

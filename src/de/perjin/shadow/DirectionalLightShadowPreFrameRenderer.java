@@ -111,7 +111,7 @@ public class DirectionalLightShadowPreFrameRenderer extends AbstractShadowPreFra
     ShadowUtil.updateFrustumPoints(viewCam, frustumNear, zFar, 1.0f, points);
 
     //shadowCam.setDirection(direction);
-    shadowCam.getRotation().lookAt(light.getDirection(), shadowCam.getUp());
+    shadowCam.getRotation().lookAt(light.getDirection(), Vector3f.UNIT_Y);
     shadowCam.update();
     shadowCam.updateViewProjection();
 

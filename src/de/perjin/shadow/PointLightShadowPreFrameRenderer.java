@@ -107,6 +107,7 @@ public class PointLightShadowPreFrameRenderer extends AbstractShadowPreFrameRend
     @Override
     protected GeometryList getOccludersToRender(int shadowMapIndex, GeometryList shadowMapOccluders) {
         for (Spatial scene : viewPort.getScenes()) {
+          // TODO: ShadowUtil.addGeometriesInCamFrustumFromNode() is probably not treating instanced meshes correctly.
             ShadowUtil.getGeometriesInCamFrustum(scene, shadowCams[shadowMapIndex], RenderQueue.ShadowMode.Cast, shadowMapOccluders);
         }
         return shadowMapOccluders;

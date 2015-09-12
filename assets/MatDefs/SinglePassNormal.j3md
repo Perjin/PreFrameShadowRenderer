@@ -2,12 +2,7 @@ MaterialDef Simple {
     MaterialParameters {
         Boolean UseInstancing
         Int NumShadows
-        Matrix4 LightViewProjectionMatrix0
-        Matrix4 LightViewProjectionMatrix1
-        Matrix4 LightViewProjectionMatrix2
-        Matrix4 LightViewProjectionMatrix3
-        Matrix4 LightViewProjectionMatrix4
-        Matrix4 LightViewProjectionMatrix5
+        Matrix4Array LightViewProjectionMatrix
         Vector4 Splits
         Vector2 FadeInfo
         Texture2D ShadowMap0
@@ -74,13 +69,8 @@ MaterialDef Simple {
                 Definition : ShadowPreFrameVertex : Common/MatDefs/ShaderNodes/Shadow/ShadowPreFrame.j3sn
                 Condition : NumberOfShadows
                 InputMappings {
-                    LightViewProjectionMatrix5 = MatParam.LightViewProjectionMatrix5
                     worldPos = VertexTransforms.worldPosition
-                    LightViewProjectionMatrix4 = MatParam.LightViewProjectionMatrix4
-                    LightViewProjectionMatrix3 = MatParam.LightViewProjectionMatrix3
-                    LightViewProjectionMatrix2 = MatParam.LightViewProjectionMatrix2
-                    LightViewProjectionMatrix1 = MatParam.LightViewProjectionMatrix1
-                    LightViewProjectionMatrix0 = MatParam.LightViewProjectionMatrix0
+                    LightViewProjectionMatrix = MatParam.LightViewProjectionMatrix
                     LightPos = MatParam.LightPos
                     LightDir = MatParam.LightDir
                 }

@@ -6,6 +6,7 @@ import com.jme3.export.JmeExporter;
 import com.jme3.export.JmeImporter;
 import com.jme3.export.OutputCapsule;
 import com.jme3.export.Savable;
+import com.jme3.material.MatParam;
 import com.jme3.material.Material;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.Matrix4f;
@@ -391,9 +392,7 @@ public abstract class AbstractShadowPreFrameRenderer implements SceneProcessor, 
       //Note that j start at 1 because other shadow renderers will have 
       //at least 1 shadow map and will set it on each frame anyway.
 //      mat.clearParam("LightViewProjectionMatrix");
-      for (int j = 1; j < nbShadowMaps; j++) {
-        mat.clearParam(lightViewStringCache[j]);
-      }
+        mat.clearParam("LightViewProjectionMatrix");
       for (int j = 1; j < nbShadowMaps; j++) {
         mat.clearParam(shadowMapStringCache[j]);
       }
@@ -426,11 +425,11 @@ public abstract class AbstractShadowPreFrameRenderer implements SceneProcessor, 
     for (Material mat : matCache) {
 
       mat.setFloat("ShadowMapSize", shadowMapSize);
-//      mat.setParam("LightViewProjectionMatrix", VarType.Matrix4Array, lightViewProjectionsMatrices);
-      mat.setParam("NumberOfShadows", VarType.Int, nbShadowMaps);
-      for (int j = 0; j < nbShadowMaps; j++) {
-        mat.setMatrix4(lightViewStringCache[j], lightViewProjectionsMatrices[j]);
-      }
+      mat.setInt("NumberOfShadows", nbShadowMaps);
+      mat.setParam("LightViewProjectionMatrix", VarType.Matrix4Array, lightViewProjectionsMatrices);
+//      for (int j = 0; j < nbShadowMaps; j++) {
+//        mat.setMatrix4(lightViewStringCache[j], lightViewProjectionsMatrices[j]);
+//      }
       for (int j = 0; j < nbShadowMaps; j++) {
         mat.setTexture(shadowMapStringCache[j], shadowMaps[j]);
       }

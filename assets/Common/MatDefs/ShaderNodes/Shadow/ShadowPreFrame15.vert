@@ -25,14 +25,14 @@ void main(){
   //  }
 
 
-    outVertexProjCoord[0] = biasMat * LightViewProjectionMatrix0 * worldPos;
+    outVertexProjCoord[0] = biasMat * LightViewProjectionMatrix[0] * worldPos;
     #ifndef SPOTLIGHT
-      outVertexProjCoord[1] = biasMat * LightViewProjectionMatrix1 * worldPos;
-      outVertexProjCoord[2] = biasMat * LightViewProjectionMatrix2 * worldPos;
-      outVertexProjCoord[3] = biasMat * LightViewProjectionMatrix3 * worldPos;
+      outVertexProjCoord[1] = biasMat * LightViewProjectionMatrix[1] * worldPos;
+      outVertexProjCoord[2] = biasMat * LightViewProjectionMatrix[2] * worldPos;
+      outVertexProjCoord[3] = biasMat * LightViewProjectionMatrix[3] * worldPos;
       #ifndef PSSM
-      outVertexProjCoord[4] = biasMat * LightViewProjectionMatrix4 * worldPos;
-      outVertexProjCoord[5] = biasMat * LightViewProjectionMatrix5 * worldPos;
+      outVertexProjCoord[4] = biasMat * LightViewProjectionMatrix[4] * worldPos;
+      outVertexProjCoord[5] = biasMat * LightViewProjectionMatrix[5] * worldPos;
       #endif
     #endif
 

@@ -28,8 +28,9 @@ MaterialDef Simple {
         Float PCFEdge
         Int NumberOfShadows
         Texture2D NormalMap -LINEAR
-        Texture2D DiffuseMap
-        Float AlphaDiscardThreshold
+        Texture2D DiffuseMap0
+        Texture2D DiffuseMap1
+        Texture2D TerrainAlphaMap -LINEAR
     }
     Technique {
         LightMode SinglePass
@@ -49,6 +50,7 @@ MaterialDef Simple {
             SHADOWMAP_SIZE : ShadowMapSize
             SHADOWCOUNT : ShadowCount
             USEALPHA : UseAlpha
+            DIFFUSEMAP : DiffuseMap1
         }
         VertexShaderNodes {
             ShaderNode AttributeToVarying {
@@ -123,12 +125,13 @@ MaterialDef Simple {
                     FadeInfo = MatParam.FadeInfo
                 }
             }
-            ShaderNode TextureFetch1 {
-                Definition : TextureFetch : Common/MatDefs/ShaderNodes/Basic/TextureFetch.j3sn
-                Condition : DiffuseMap
+            ShaderNode TerrainAlpha {
+                Definition : TerrainAlpha : Common/MatDefs/ShaderNodes/Terrain/TerrainAlpha.j3sn
                 InputMappings {
-                    texCoord = AttributeToVarying.vec2Variable
-                    textureMap = MatParam.DiffuseMap
+                    inUV = AttributeToVarying.vec2Variable
+                    diffuse0 = MatParam.DiffuseMap0
+                    diffuse1 = MatParam.DiffuseMap1
+                    terrainAlpha = MatParam.TerrainAlphaMap
                 }
             }
             ShaderNode SinglePassLighting {
@@ -146,7 +149,7 @@ MaterialDef Simple {
                     inViewPos = VertexTransforms.worldViewPosition
                     shadow = ShadowPreFrameFragment.shadowIntensity : NumberOfShadows
                     ShadowLight = MatParam.ShadowLight : NumberOfShadows
-                    diffuse = TextureFetch1.outColor : DiffuseMap
+                    diffuse = TerrainAlpha.terrainDiffuse
                 }
             }
         }
@@ -162,7 +165,6 @@ MaterialDef Simple {
         }
         Defines {
             INSTANCING : UseInstancing
-            DISCARD_ALPHA : AlphaDiscardThreshold
         }
 
         RenderState {

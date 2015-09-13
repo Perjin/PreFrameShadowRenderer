@@ -166,7 +166,7 @@ MaterialDef Simple {
         }
 
         RenderState {
-            FaceCull Off
+            FaceCull Front
             DepthTest On
             DepthWrite On
             PolyOffset 5 3

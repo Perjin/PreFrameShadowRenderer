@@ -4,6 +4,7 @@ import com.jme3.animation.AnimControl;
 import com.jme3.animation.SkeletonControl;
 import com.jme3.app.SimpleApplication;
 import com.jme3.app.state.ScreenshotAppState;
+import com.jme3.app.state.VideoRecorderAppState;
 import com.jme3.input.KeyInput;
 import com.jme3.input.controls.ActionListener;
 import com.jme3.input.controls.KeyTrigger;
@@ -329,7 +330,7 @@ public class Main extends SimpleApplication {
     shadowProcessor = dsipr;
     dsipr.setShadowCompareMode(CompareMode.Hardware);
     dsipr.setEdgeFilteringMode(EdgeFilteringMode.Bilinear);
-    dsipr.setEdgesThickness(5);
+//    dsipr.setEdgesThickness(5);
     dsipr.setLight(directionalLight);
     rootNode.addLight(directionalLight);
     viewPort.addProcessor(dsipr);
@@ -348,7 +349,7 @@ public class Main extends SimpleApplication {
     shadowProcessor = dsipr;
     dsipr.setShadowCompareMode(CompareMode.Hardware);
     dsipr.setEdgeFilteringMode(EdgeFilteringMode.Bilinear);
-    dsipr.setEdgesThickness(5);
+//    dsipr.setEdgesThickness(5);
     dsipr.setLight(directionalLight);
     rootNode.addLight(directionalLight);
     viewPort.addProcessor(dsipr);

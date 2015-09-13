@@ -27,12 +27,19 @@ vec3 computeSingleLight(in vec4 lightColor, in vec4 lightData1, in vec4 lightDat
                 lightDir.xyz = normalize(lightDir.xyz);                
             #endif
             
-            vec2 light = computeLighting(viewNormal, viewDir, lightDir.xyz, lightDir.w * spotFallOff , 0.0);
+            vec2 light = computeLighting(viewNormal, viewDir, lightDir.xyz, lightDir.w * spotFallOff , 10.0);
           
             return lightColor.xyz* (light.x + light.y) ;
 }
 
 void main(){
+  #ifdef DIFFUSEMAP
+    #ifdef USEALPHA
+      if (diffuse.a < 0.5){
+        discard;
+      }
+    #endif
+  #endif
   singlePassOut = vec4(0.0,0.0,0.0,1.0);
   vec3 viewNormalNormalized = normalize(viewNormal);
 
@@ -58,6 +65,12 @@ void main(){
     singlePassOut.xyz += computeSingleLight(lightColorData, g_LightData[i+1], g_LightData[i+2], inViewPos, viewDir, viewNormalNormalized) * shadowValue;
   }
   #ifdef DIFFUSEMAP
-    singlePassOut.xyz *= diffuse;
+    #ifdef USEALPHA
+      singlePassOut *= diffuse;
+    #else
+      singlePassOut.xyz *= diffuse.xyz;
+    #endif
   #endif
+  
+  singlePassOut.xyz = mix(singlePassOut.xyz, vec3(0.6,0.75,0.9), distance(inWorldPosition.xyz,inCameraPosition.xyz) * 0.00001 * max((50.0 - inWorldPosition.y),0.0));
 }

@@ -6,7 +6,6 @@ import com.jme3.export.JmeExporter;
 import com.jme3.export.JmeImporter;
 import com.jme3.export.OutputCapsule;
 import com.jme3.export.Savable;
-import com.jme3.material.MatParam;
 import com.jme3.material.Material;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.Matrix4f;
@@ -30,7 +29,6 @@ import com.jme3.texture.FrameBuffer;
 import com.jme3.texture.Image;
 import com.jme3.texture.Texture;
 import com.jme3.texture.Texture2D;
-import com.jme3.texture.TextureArray;
 import com.jme3.ui.Picture;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -69,7 +67,7 @@ public abstract class AbstractShadowPreFrameRenderer implements SceneProcessor, 
   protected GeometryList lightReceivers = new GeometryList(new OpaqueComparator());
   protected GeometryList shadowMapOccluders = new GeometryList(new OpaqueComparator());
   private String[] shadowMapStringCache;
-  private String[] lightViewStringCache;
+//  private String[] lightViewStringCache;
   /**
    * fade shadows at distance
    */
@@ -106,7 +104,7 @@ public abstract class AbstractShadowPreFrameRenderer implements SceneProcessor, 
     dispPic = new Picture[nbShadowMaps];
     lightViewProjectionsMatrices = new Matrix4f[nbShadowMaps];
     shadowMapStringCache = new String[nbShadowMaps];
-    lightViewStringCache = new String[nbShadowMaps];
+//    lightViewStringCache = new String[nbShadowMaps];
 
     //DO NOT COMMENT THIS (it prevent the OSX incomplete read buffer crash)
     dummyTex = new Texture2D(shadowMapSize, shadowMapSize, Image.Format.RGBA8);
@@ -123,7 +121,7 @@ public abstract class AbstractShadowPreFrameRenderer implements SceneProcessor, 
       //DO NOT COMMENT THIS (it prevent the OSX incomplete read buffer crash)
       shadowFB[i].setColorTexture(dummyTex);
       shadowMapStringCache[i] = "ShadowMap" + i;
-      lightViewStringCache[i] = "LightViewProjectionMatrix" + i;
+//      lightViewStringCache[i] = "LightViewProjectionMatrix" + i;
 
 
       //quads for debuging purpose

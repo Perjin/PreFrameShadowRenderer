@@ -4,7 +4,7 @@ uniform vec4 g_LightData[NB_LIGHTS];
 #ifdef NORMALMAP   
   mat3 tbnMat;
 #endif
-vec3 computeSingleLight(in vec4 lightColor, in vec4 lightData1, in vec4 lightData2, in vec3 viewPos, in vec3 viewDir, in vec3 viewNormal){
+vec3 computeSingleLight(in vec4 lightColor, in vec4 lightData1, in vec4 lightData2, in vec3 viewPos, in vec3 viewDir, in vec3 worldNormal){
             vec4 lightDir;
             vec3 lightVec;    
             lightComputeDir(viewPos, lightColor.w, lightData1, lightDir,lightVec);
@@ -27,7 +27,7 @@ vec3 computeSingleLight(in vec4 lightColor, in vec4 lightData1, in vec4 lightDat
                 lightDir.xyz = normalize(lightDir.xyz);                
             #endif
             
-            vec2 light = computeLighting(viewNormal, viewDir, lightDir.xyz, lightDir.w * spotFallOff , 10.0);
+            vec2 light = computeLighting(worldNormal, viewDir, lightDir.xyz, lightDir.w * spotFallOff , 10.0);
           
             return lightColor.xyz* (light.x + light.y) ;
 }
@@ -43,7 +43,7 @@ void main(){
     #endif
   #endif
   singlePassOut = vec4(0.0,0.0,0.0,1.0);
-  vec3 viewNormalNormalized = normalize(viewNormal);
+  vec3 worldNormalNormalized = normalize(worldNormal);
 
   #ifdef NORMALMAP   
     vec3 viewDir = inViewDir;
@@ -56,7 +56,7 @@ void main(){
   for( int i = 0;i < NB_LIGHTS; i+=3){
     lightColorData = g_LightData[i];
 
-    singlePassOut.xyz += computeSingleLight(lightColorData, g_LightData[i+1], g_LightData[i+2], inViewPos, viewDir, viewNormalNormalized) * max(shadowIntensity[i/3],0.0);
+    singlePassOut.xyz += computeSingleLight(lightColorData, g_LightData[i+1], g_LightData[i+2], inWorldPosition.xyz, viewDir, worldNormalNormalized) * max(shadowIntensity[i/3],0.0);
   }
   #ifdef DIFFUSEMAP
     #ifdef USEALPHA

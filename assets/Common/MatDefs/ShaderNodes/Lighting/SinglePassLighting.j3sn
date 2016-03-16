@@ -8,7 +8,7 @@ ShaderNodeDefinitions{
                         
         }
         Input {
-          vec3 viewNormal
+          vec3 worldNormal
           vec3 inViewPos
           vec3 inViewDir : NORMALMAP
           int ShadowLight

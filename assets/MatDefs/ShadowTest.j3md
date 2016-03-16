@@ -89,7 +89,7 @@ MaterialDef Simple {
             ShaderNode SinglePassLighting {
                 Definition : SinglePassLighting : Common/MatDefs/ShaderNodes/Lighting/SinglePassLighting.j3sn
                 InputMappings {
-                    viewNormal = VertexTransforms.normal
+                    worldNormal = VertexTransforms.normal
                     inViewPos = VertexTransforms.worldViewPosition
                     inWorldPosition = VertexTransforms.worldPosition
                     inCameraPosition = WorldParam.CameraPosition

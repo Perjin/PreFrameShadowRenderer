@@ -1,0 +1,127 @@
+MaterialDef Simple {
+    MaterialParameters {
+        TextureArray DirectionalShadowMaps
+        TextureArray PointShadowMaps
+        TextureArray SpotShadowMaps
+        Int MAXDIRECTIONALSHADOWLIGHTS
+        Int MAXPOINTSHADOWLIGHTS
+        Int MAXSPOTSHADOWLIGHTS
+        Int TOTALSHADOWMAPS
+        Matrix4Array ShadowLightViewProjectionMatrix
+        Color Diffuse
+        Float DIRECTIONALSHADOWMAP_SIZE
+        Float POINTSHADOWMAP_SIZE
+        Float SPOTSHADOWMAP_SIZE
+        Vector4Array Splits
+        Int ActiveDirectionalShadows
+        Int ActivePointShadows
+        Int ActiveSpotShadows
+        Vector3Array PointLightPosition
+        Int LIGHTS
+        Int StartIndex
+    }
+    Technique {
+        LightMode SinglePass
+        WorldParameters {
+            WorldViewProjectionMatrix
+            WorldMatrix
+            ViewMatrix
+            ViewProjectionMatrix
+            WorldViewMatrix
+            NormalMatrix
+            CameraPosition
+        }
+        Defines {
+            MAXDIRECTIONALSHADOWLIGHTS : MAXDIRECTIONALSHADOWLIGHTS
+            MAXPOINTSHADOWLIGHTS : MAXPOINTSHADOWLIGHTS
+            MAXSPOTSHADOWLIGHTS : MAXSPOTSHADOWLIGHTS
+            DIRECTIONALSHADOWMAP_SIZE : DIRECTIONALSHADOWMAP_SIZE
+            POINTSHADOWMAP_SIZE : POINTSHADOWMAP_SIZE
+            SPOTSHADOWMAP_SIZE : SPOTSHADOWMAP_SIZE
+            TOTALSHADOWMAPS : TOTALSHADOWMAPS
+            LIGHTS : LIGHTS
+        }
+        VertexShaderNodes {
+            ShaderNode VertexTransforms {
+                Definition : VertexTransforms : Common/MatDefs/ShaderNodes/Basic/VertexTransforms.j3sn
+                InputMappings {
+                    worldViewProjectionMatrix = WorldParam.WorldViewProjectionMatrix
+                    worldMatrix = WorldParam.WorldMatrix
+                    viewMatrix = WorldParam.ViewMatrix
+                    viewProjectionMatrix = WorldParam.ViewProjectionMatrix
+                    worldViewMatrix = WorldParam.WorldViewMatrix
+                    normalMatrix = WorldParam.NormalMatrix
+                    modelPosition = Attr.inPosition.xyz
+                    inNormal = Attr.inNormal
+                    inTangent = Attr.inTangent
+                    inInstanceData = Attr.inInstanceData
+                }
+                OutputMappings {
+                    Global.position = worldViewProjectionPosition
+                }
+            }
+            ShaderNode ShadowSinglePassVertex {
+                Definition : ShadowSinglePassVertex : Common/MatDefs/ShaderNodes/Shadow/ShadowSingle.j3sn
+                InputMappings {
+                    worldPos = VertexTransforms.worldPosition : TOTALSHADOWMAPS
+                    ShadowLightViewProjectionMatrix = MatParam.ShadowLightViewProjectionMatrix : TOTALSHADOWMAPS
+                }
+            }
+        }
+        FragmentShaderNodes {
+            ShaderNode ShadowSinglePassFragment{
+                Definition : ShadowSinglePassFragment : Common/MatDefs/ShaderNodes/Shadow/ShadowSingle.j3sn
+                InputMappings {
+                    DirectionalShadowMap = MatParam.DirectionalShadowMaps : TOTALSHADOWMAPS
+                    PointShadowMap = MatParam.PointShadowMaps : TOTALSHADOWMAPS
+                    SpotShadowMap = MatParam.SpotShadowMaps : TOTALSHADOWMAPS
+                    worldPos = VertexTransforms.worldPosition : TOTALSHADOWMAPS
+                    shadowPosition = VertexTransforms.worldViewProjectionPosition.z
+                    splits = MatParam.Splits : MAXDIRECTIONALSHADOWLIGHTS : TOTALSHADOWMAPS
+                    ActiveDirectionalShadows = MatParam.ActiveDirectionalShadows : TOTALSHADOWMAPS
+                    ActivePointShadows = MatParam.ActivePointShadows : TOTALSHADOWMAPS
+                    ActiveSpotShadows = MatParam.ActiveSpotShadows : TOTALSHADOWMAPS
+                    shadowProjCoord = ShadowSinglePassVertex.shadowVertexProjCoord : TOTALSHADOWMAPS
+                    pointLightPosition = MatParam.PointLightPosition : MAXPOINTSHADOWLIGHTS
+                    startIndex = MatParam.StartIndex : TOTALSHADOWMAPS
+                }
+            }
+            ShaderNode SinglePassLighting {
+                Definition : SinglePassLighting : Common/MatDefs/ShaderNodes/Lighting/SinglePassLighting.j3sn
+                InputMappings {
+                    viewNormal = VertexTransforms.normal
+                    inViewPos = VertexTransforms.worldViewPosition
+                    inWorldPosition = VertexTransforms.worldPosition
+                    inCameraPosition = WorldParam.CameraPosition
+                    diffuse = MatParam.Diffuse
+                    shadowIntensity = ShadowSinglePassFragment.shadowIntensity : LIGHTS
+                }
+                OutputMappings {
+                    Global.color = singlePassOut
+                }
+            }
+        }
+    }
+    Technique PreShadow {
+        VertexShader GLSL110: Common/MatDefs/Shadow/PreShadow.vert
+        FragmentShader GLSL110: Common/MatDefs/Shadow/PreShadow.frag
+        WorldParameters {
+            WorldViewProjectionMatrix
+            WorldViewMatrix
+            ViewMatrix
+            ViewProjectionMatrix
+        }
+        Defines {
+            INSTANCING : UseInstancing
+            DISCARD_ALPHA : AlphaDiscardThreshold
+        }
+
+        RenderState {
+            FaceCull Off
+            DepthTest On
+            DepthWrite On
+            PolyOffset 5 3
+            ColorWrite Off
+        }
+    }
+}

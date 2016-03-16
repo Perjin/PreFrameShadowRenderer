@@ -1,0 +1,51 @@
+ShaderNodeDefinitions{
+    ShaderNodeDefinition ShadowSinglePassVertex {      
+        Type: Vertex
+        Shader GLSL150: Common/MatDefs/ShaderNodes/Shadow/ShadowSingle.vert
+        Documentation{
+            This Node is responsible for computing shadows of a light sources.
+            // TOTALSHADOWMAPS
+        }
+        Input {
+            vec4 worldPos : TOTALSHADOWMAPS
+            mat4 ShadowLightViewProjectionMatrix[TOTALSHADOWMAPS] : TOTALSHADOWMAPS
+        }
+        Output {
+            vec4 shadowVertexProjCoord[TOTALSHADOWMAPS] : TOTALSHADOWMAPS
+        }
+    }
+    ShaderNodeDefinition ShadowSinglePassFragment {      
+        Type: Fragment
+        Shader GLSL150: Common/MatDefs/ShaderNodes/Shadow/ShadowSingle.frag
+        Documentation{            
+            This Node is responsible for computing shadows of a light sources.
+            required defines are: 
+            // MAXDIRECTIONALSHADOWLIGHTS
+            // MAXPOINTSHADOWLIGHTS
+            // MAXSPOTSHADOWLIGHTS
+            // DIRECTIONALSHADOWMAP_SIZE
+            // POINTSHADOWMAP_SIZE
+            // SPOTSHADOWMAP_SIZE
+            // TOTALSHADOWMAPS
+            // NB_LIGHTS
+        }
+        Input {
+            
+            vec4 splits[MAXDIRECTIONALSHADOWLIGHTS] : MAXDIRECTIONALSHADOWLIGHTS
+            vec4 shadowProjCoord[TOTALSHADOWMAPS] : TOTALSHADOWMAPS
+            sampler2DArrayShadow DirectionalShadowMap : TOTALSHADOWMAPS
+            sampler2DArrayShadow PointShadowMap : TOTALSHADOWMAPS
+            sampler2DArrayShadow SpotShadowMap : TOTALSHADOWMAPS
+            vec4 worldPos : TOTALSHADOWMAPS
+            float shadowPosition : TOTALSHADOWMAPS
+            int ActiveDirectionalShadows : TOTALSHADOWMAPS
+            int ActivePointShadows : TOTALSHADOWMAPS
+            int ActiveSpotShadows : TOTALSHADOWMAPS
+            vec3 pointLightPosition[MAXPOINTSHADOWLIGHTS] : MAXPOINTSHADOWLIGHTS
+            int startIndex : TOTALSHADOWMAPS
+        }
+        Output {
+          float shadowIntensity[LIGHTS] : TOTALSHADOWMAPS
+        }
+    }
+}

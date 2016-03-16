@@ -6,3 +6,4 @@ lwjgl.dll
 master-application.jnlp
 nbproject/
 /dist/
+/.nb-gradle/

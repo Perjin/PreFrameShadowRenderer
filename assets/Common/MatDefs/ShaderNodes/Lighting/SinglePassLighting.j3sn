@@ -11,12 +11,12 @@ ShaderNodeDefinitions{
           vec3 viewNormal
           vec3 inViewPos
           vec3 inViewDir : NORMALMAP
-          float shadow
           int ShadowLight
           mat3 inTbnMat : NORMALMAP
           vec4 diffuse : DIFFUSEMAP
           vec4 inWorldPosition
           vec3 inCameraPosition
+          float shadowIntensity[LIGHTS] : LIGHTS
         }
         Output {
           vec4 singlePassOut

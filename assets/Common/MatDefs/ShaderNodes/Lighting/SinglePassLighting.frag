@@ -32,6 +32,8 @@ vec3 computeSingleLight(in vec4 lightColor, in vec4 lightData1, in vec4 lightDat
             return lightColor.xyz* (light.x + light.y) ;
 }
 
+//in float shadowIntensity[LIGHTS];
+
 void main(){
   #ifdef DIFFUSEMAP
     #ifdef USEALPHA
@@ -50,19 +52,11 @@ void main(){
     vec3 viewDir = normalize(-inViewPos.xyz);
   #endif
 
-  float shadowValue = 1.0;
   vec4 lightColorData;
   for( int i = 0;i < NB_LIGHTS; i+=3){
     lightColorData = g_LightData[i];
-    #ifdef NUMBEROFSHADOWS
-    if (i == ShadowLight){
-      shadowValue = max(shadow,0.0);
-    } else {
-      shadowValue = 1.0;
-    }
-    #endif
 
-    singlePassOut.xyz += computeSingleLight(lightColorData, g_LightData[i+1], g_LightData[i+2], inViewPos, viewDir, viewNormalNormalized) * shadowValue;
+    singlePassOut.xyz += computeSingleLight(lightColorData, g_LightData[i+1], g_LightData[i+2], inViewPos, viewDir, viewNormalNormalized) * max(shadowIntensity[i/3],0.0);
   }
   #ifdef DIFFUSEMAP
     #ifdef USEALPHA
